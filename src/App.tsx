@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
 import Header from "./components/Header";
+import FloatingNav from "./components/FloatingNav";
 import Index from "./pages/Index";
 import QueueRanking from "./pages/QueueRanking";
 import TicketRetrieval from "./pages/TicketRetrieval";
@@ -31,6 +32,7 @@ const App = () => (
                 <Route path="/operator" element={<OperatorDashboard />} />
               </Routes>
             </main>
+            <FloatingNav />
           </div>
         </BrowserRouter>
       </TooltipProvider>
