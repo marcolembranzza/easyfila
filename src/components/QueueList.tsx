@@ -8,8 +8,13 @@ interface QueueListProps {
 }
 
 export const QueueList = ({ items, onStatusChange, isOperator = false }: QueueListProps) => {
-  // Sort items by number to ensure they are displayed in order
-  const sortedItems = [...items].sort((a, b) => a.number - b.number);
+  // Sort items by priority first, then by number
+  const sortedItems = [...items].sort((a, b) => {
+    if (a.priority !== b.priority) {
+      return b.priority ? 1 : -1;
+    }
+    return a.number - b.number;
+  });
 
   return (
     <div className="space-y-4">
