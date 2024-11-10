@@ -39,12 +39,20 @@ const OperatorDashboard = () => {
   }, []);
 
   const updateStats = (items: QueueItem[]) => {
-    const completed = items.filter(item => item.status === 'completed').length;
+    // Get today's date at midnight for comparison
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const completedToday = items.filter(item => {
+      const itemDate = new Date(item.updated_at);
+      return item.status === 'completed' && itemDate >= today;
+    }).length;
+
     const waiting = items.filter(item => item.status === 'waiting').length;
     const avgWaitTime = Math.round(items.reduce((acc, item) => acc + (item.estimated_time || 0), 0) / items.length) || 0;
 
     setStats({
-      totalServed: completed,
+      totalServed: completedToday,
       averageWaitTime: avgWaitTime,
       currentQueueSize: waiting,
     });
