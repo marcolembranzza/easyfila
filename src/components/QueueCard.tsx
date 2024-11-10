@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { QueueItem } from "@/types";
 import { Clock, User, Phone } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface QueueCardProps {
   item: QueueItem;
@@ -9,6 +10,9 @@ interface QueueCardProps {
 }
 
 export const QueueCard = ({ item, onStatusChange, isOperator = false }: QueueCardProps) => {
+  const { user } = useAuth();
+  const isClient = user?.role === 'client';
+
   const getStatusColor = () => {
     switch (item.status) {
       case 'waiting': return 'bg-yellow-100 text-yellow-800';
@@ -48,10 +52,12 @@ export const QueueCard = ({ item, onStatusChange, isOperator = false }: QueueCar
             <span className="font-medium">{item.client_name}</span>
           </div>
           
-          <div className="flex items-center space-x-2">
-            <Phone className="h-5 w-5 text-gray-500" />
-            <span>{item.phone_number}</span>
-          </div>
+          {!isClient && (
+            <div className="flex items-center space-x-2">
+              <Phone className="h-5 w-5 text-gray-500" />
+              <span>{item.phone_number}</span>
+            </div>
+          )}
           
           {item.notes && (
             <div className="text-sm text-gray-600 italic">
