@@ -3,7 +3,6 @@ import { useParams } from "react-router-dom";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { BellRing } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
-import { QueueItem } from "@/types";
 
 const ClientNotification = () => {
   const { ticketId } = useParams();
@@ -11,14 +10,12 @@ const ClientNotification = () => {
   const [queuePosition, setQueuePosition] = useState(0);
   const [isVibrating, setIsVibrating] = useState(false);
 
-  // Simulate queue position updates
   useEffect(() => {
     const interval = setInterval(() => {
       setQueuePosition((prev) => {
         const newPosition = Math.max(0, prev - 1);
         if (newPosition <= 2 && !isVibrating) {
           setIsVibrating(true);
-          // Vibrate if available
           if (navigator.vibrate) {
             navigator.vibrate([200, 100, 200]);
             toast({

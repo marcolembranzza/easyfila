@@ -19,6 +19,16 @@ export const QueueCard = ({ item, onStatusChange, isOperator = false }: QueueCar
     }
   };
 
+  const getStatusText = (status: QueueItem['status']) => {
+    switch (status) {
+      case 'waiting': return 'Aguardando';
+      case 'inProgress': return 'Em Atendimento';
+      case 'completed': return 'Concluído';
+      case 'cancelled': return 'Cancelado';
+      default: return status;
+    }
+  };
+
   const handleStatusChange = async (newStatus: QueueItem['status']) => {
     if (onStatusChange) {
       await onStatusChange(item.id, newStatus);
@@ -57,7 +67,7 @@ export const QueueCard = ({ item, onStatusChange, isOperator = false }: QueueCar
           <span 
             className={`px-2 py-1 rounded text-xs font-semibold ${getStatusColor()}`}
           >
-            {item.status}
+            {getStatusText(item.status)}
           </span>
         </div>
         

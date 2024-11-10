@@ -83,28 +83,28 @@ const OperatorDashboard = () => {
 
   return (
     <div className="container mx-auto py-8">
-      <h1 className="text-3xl font-bold mb-8">Operator Dashboard</h1>
+      <h1 className="text-3xl font-bold mb-8">Painel do Operador</h1>
       
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         <StatsCard
-          title="Current Queue Size"
+          title="Tamanho da Fila"
           value={stats.currentQueueSize}
           icon={<Users className="text-primary" />}
         />
         <StatsCard
-          title="Average Wait Time"
+          title="Tempo Médio de Espera"
           value={`${stats.averageWaitTime} min`}
           icon={<Clock className="text-primary" />}
         />
         <StatsCard
-          title="Total Served Today"
+          title="Total Atendidos Hoje"
           value={stats.totalServed}
           icon={<CheckCircle2 className="text-primary" />}
         />
       </div>
 
       <div className="bg-white rounded-lg shadow p-6">
-        <h2 className="text-xl font-semibold mb-4">Current Queue</h2>
+        <h2 className="text-xl font-semibold mb-4">Fila Atual</h2>
         <QueueList
           items={queue}
           onStatusChange={handleStatusChange}
