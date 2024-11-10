@@ -5,10 +5,10 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
 import Header from "./components/Header";
-import Index from "./pages/Index";
+import TicketRetrieval from "./pages/TicketRetrieval";
+import RoleSelection from "./pages/RoleSelection";
 import OperatorDashboard from "./pages/OperatorDashboard";
 import ClientView from "./pages/ClientView";
-import TicketRetrieval from "./pages/TicketRetrieval";
 
 const queryClient = new QueryClient();
 
@@ -23,10 +23,10 @@ const App = () => (
             <Header />
             <main className="flex-1">
               <Routes>
-                <Route path="/" element={<Index />} />
+                <Route path="/" element={<TicketRetrieval />} />
+                <Route path="/admin" element={<RoleSelection />} />
                 <Route path="/operator" element={<OperatorDashboard />} />
                 <Route path="/client" element={<ClientView />} />
-                <Route path="/ticket" element={<TicketRetrieval />} />
               </Routes>
             </main>
           </div>
