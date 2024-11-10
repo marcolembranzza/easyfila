@@ -19,8 +19,12 @@ const OperatorDashboard = () => {
     const fetchQueue = async () => {
       try {
         const items = await queueService.getQueueItems();
-        setQueue(items);
-        updateStats(items);
+        // Filter out completed and cancelled tickets
+        const activeItems = items.filter(
+          item => item.status !== 'completed' && item.status !== 'cancelled'
+        );
+        setQueue(activeItems);
+        updateStats(items); // Keep all items for stats calculation
       } catch (error) {
         console.error('Error fetching queue:', error);
       }
@@ -29,8 +33,12 @@ const OperatorDashboard = () => {
     fetchQueue();
 
     const subscription = queueService.subscribeToQueue((items) => {
-      setQueue(items);
-      updateStats(items);
+      // Filter out completed and cancelled tickets
+      const activeItems = items.filter(
+        item => item.status !== 'completed' && item.status !== 'cancelled'
+      );
+      setQueue(activeItems);
+      updateStats(items); // Keep all items for stats calculation
     });
 
     return () => {
@@ -39,7 +47,6 @@ const OperatorDashboard = () => {
   }, []);
 
   const updateStats = (items: QueueItem[]) => {
-    // Get today's date at midnight for comparison
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
