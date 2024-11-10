@@ -1,7 +1,7 @@
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Clock, User } from "lucide-react";
+import { Clock, User, Phone } from "lucide-react";
 import { QueueItem } from "@/types";
 
 interface QueueCardProps {
@@ -31,6 +31,10 @@ export const QueueCard = ({ item, onStatusChange, isOperator = false }: QueueCar
           <div className="flex items-center gap-2 mt-2 text-gray-600">
             <User size={16} />
             <span>{item.client_name}</span>
+          </div>
+          <div className="flex items-center gap-2 mt-1 text-gray-600">
+            <Phone size={16} />
+            <span>{item.phone_number}</span>
           </div>
           {item.estimated_time && (
             <div className="flex items-center gap-2 mt-1 text-gray-600">
