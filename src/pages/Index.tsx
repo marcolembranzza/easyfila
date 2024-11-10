@@ -1,11 +1,38 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
 
 const Index = () => {
+  const navigate = useNavigate();
+  const [role, setRole] = useState<'operator' | 'client' | null>(null);
+
+  const handleRoleSelect = (selectedRole: 'operator' | 'client') => {
+    setRole(selectedRole);
+    navigate(selectedRole === 'operator' ? '/operator' : '/client');
+  };
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4">Welcome to Your Blank App</h1>
-        <p className="text-xl text-gray-600">Start building your amazing project here!</p>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-blue-100">
+      <div className="text-center space-y-8 p-8 bg-white rounded-xl shadow-lg max-w-md w-full">
+        <h1 className="text-4xl font-bold text-gray-900">Queue Management System</h1>
+        <p className="text-gray-600">Select your role to continue</p>
+        
+        <div className="space-y-4">
+          <Button
+            className="w-full text-lg py-6"
+            onClick={() => handleRoleSelect('operator')}
+          >
+            I'm an Operator
+          </Button>
+          
+          <Button
+            className="w-full text-lg py-6"
+            variant="outline"
+            onClick={() => handleRoleSelect('client')}
+          >
+            I'm a Client
+          </Button>
+        </div>
       </div>
     </div>
   );
