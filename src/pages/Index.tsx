@@ -41,6 +41,14 @@ const Index = () => {
           >
             Painel do Operador
           </Button>
+
+          <Button
+            className="w-full text-lg py-6"
+            variant="secondary"
+            onClick={() => navigate('/display')}
+          >
+            Painel Geral
+          </Button>
         </div>
       </div>
     </div>
