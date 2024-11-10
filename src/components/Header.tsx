@@ -1,5 +1,5 @@
 import { User, UserCog, LogOut } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Avatar, AvatarFallback } from "./ui/avatar";
 import {
   DropdownMenu,
@@ -10,9 +10,12 @@ import {
 } from "./ui/dropdown-menu";
 
 const Header = () => {
+  const navigate = useNavigate();
+
   const handleLogout = () => {
-    // Implement logout logic here
+    // TODO: Add actual logout logic (authentication, clearing tokens, etc.)
     console.log("Logout clicked");
+    navigate('/'); // Navigate back to the initial screen
   };
 
   return (
