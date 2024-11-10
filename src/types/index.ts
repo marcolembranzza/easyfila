@@ -5,11 +5,11 @@ export type QueueStatus = 'waiting' | 'inProgress' | 'completed' | 'cancelled';
 export interface QueueItem {
   id: string;
   number: number;
-  clientName: string;
+  client_name: string;
   status: QueueStatus;
-  createdAt: Date;
-  updatedAt: Date;
-  estimatedTime?: number;
+  created_at: string;
+  updated_at: string;
+  estimated_time?: number;
   notes?: string;
 }
 
