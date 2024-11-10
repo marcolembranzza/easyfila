@@ -31,6 +31,9 @@ const FloatingNav = () => {
           <DropdownMenuItem onClick={() => navigate('/operator')}>
             Controle de Fila
           </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => navigate('/display')}>
+            Painel Geral
+          </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
     </div>
