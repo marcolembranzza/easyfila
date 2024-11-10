@@ -5,6 +5,9 @@ import { BellRing } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { queueService } from "@/lib/supabase";
 import { QueueItem } from "@/types";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
 
 const ClientNotification = () => {
   const { ticketId } = useParams();
@@ -12,8 +15,43 @@ const ClientNotification = () => {
   const [queuePosition, setQueuePosition] = useState<number | null>(null);
   const [isVibrating, setIsVibrating] = useState(false);
   const [currentTicket, setCurrentTicket] = useState<QueueItem | null>(null);
+  const [isVerified, setIsVerified] = useState(false);
+  const [verificationData, setVerificationData] = useState({
+    name: '',
+    phoneNumber: ''
+  });
+
+  const verifyTicket = async () => {
+    try {
+      const items = await queueService.getQueueItems();
+      const ticket = items.find(item => 
+        item.id === ticketId && 
+        item.client_name.toLowerCase() === verificationData.name.toLowerCase() &&
+        item.phone_number === verificationData.phoneNumber
+      );
+
+      if (ticket) {
+        setIsVerified(true);
+        setCurrentTicket(ticket);
+      } else {
+        toast({
+          title: "Verificação falhou",
+          description: "Nome ou número de telefone incorretos.",
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Erro",
+        description: "Não foi possível verificar seus dados.",
+        variant: "destructive"
+      });
+    }
+  };
 
   useEffect(() => {
+    if (!isVerified) return;
+
     const fetchQueuePosition = async () => {
       try {
         const items = await queueService.getQueueItems();
@@ -61,7 +99,7 @@ const ClientNotification = () => {
     fetchQueuePosition();
     const interval = setInterval(fetchQueuePosition, 5000);
     return () => clearInterval(interval);
-  }, [ticketId, isVibrating, toast]);
+  }, [ticketId, isVibrating, toast, isVerified]);
 
   const getStatusMessage = () => {
     if (!currentTicket) return "Carregando...";
@@ -70,6 +108,46 @@ const ClientNotification = () => {
     if (currentTicket.status === 'cancelled') return "Senha cancelada";
     return `Sua posição na fila: ${queuePosition}`;
   };
+
+  if (!isVerified) {
+    return (
+      <div className="container mx-auto p-4 max-w-md">
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-2xl text-center">Verificar Senha</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="name">Nome</Label>
+                <Input
+                  id="name"
+                  value={verificationData.name}
+                  onChange={(e) => setVerificationData(prev => ({ ...prev, name: e.target.value }))}
+                  placeholder="Digite seu nome"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="phoneNumber">Telefone</Label>
+                <Input
+                  id="phoneNumber"
+                  value={verificationData.phoneNumber}
+                  onChange={(e) => setVerificationData(prev => ({ ...prev, phoneNumber: e.target.value }))}
+                  placeholder="(XX) XXXXX-XXXX"
+                />
+              </div>
+              <Button 
+                className="w-full" 
+                onClick={verifyTicket}
+              >
+                Verificar
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto p-4 max-w-md">
