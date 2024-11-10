@@ -30,12 +30,12 @@ export const QueueCard = ({ item, onStatusChange, isOperator = false }: QueueCar
           </div>
           <div className="flex items-center gap-2 mt-2 text-gray-600">
             <User size={16} />
-            <span>{item.clientName}</span>
+            <span>{item.client_name}</span>
           </div>
-          {item.estimatedTime && (
+          {item.estimated_time && (
             <div className="flex items-center gap-2 mt-1 text-gray-600">
               <Clock size={16} />
-              <span>~{item.estimatedTime} min</span>
+              <span>~{item.estimated_time} min</span>
             </div>
           )}
         </div>

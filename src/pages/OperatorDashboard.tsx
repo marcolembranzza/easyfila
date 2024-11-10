@@ -41,7 +41,7 @@ const OperatorDashboard = () => {
   const updateStats = (items: QueueItem[]) => {
     const completed = items.filter(item => item.status === 'completed').length;
     const waiting = items.filter(item => item.status === 'waiting').length;
-    const avgWaitTime = Math.round(items.reduce((acc, item) => acc + (item.estimatedTime || 0), 0) / items.length) || 0;
+    const avgWaitTime = Math.round(items.reduce((acc, item) => acc + (item.estimated_time || 0), 0) / items.length) || 0;
 
     setStats({
       totalServed: completed,
