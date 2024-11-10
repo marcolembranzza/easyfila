@@ -101,6 +101,19 @@ const ClientNotification = () => {
     return () => clearInterval(interval);
   }, [ticketId, isVibrating, toast, isVerified]);
 
+  const formatPhoneNumber = (value: string) => {
+    const numbers = value.replace(/\D/g, "");
+    if (numbers.length <= 2) return `(${numbers}`;
+    if (numbers.length <= 6) return `(${numbers.slice(0, 2)}) ${numbers.slice(2)}`;
+    if (numbers.length <= 10) return `(${numbers.slice(0, 2)}) ${numbers.slice(2, 6)}-${numbers.slice(6)}`;
+    return `(${numbers.slice(0, 2)}) ${numbers.slice(2, 7)}-${numbers.slice(7, 11)}`;
+  };
+
+  const handlePhoneNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const formattedNumber = formatPhoneNumber(e.target.value);
+    setVerificationData(prev => ({ ...prev, phoneNumber: formattedNumber }));
+  };
+
   const getStatusMessage = () => {
     if (!currentTicket) return "Carregando...";
     if (currentTicket.status === 'inProgress') return "Agora é sua vez!";
@@ -132,8 +145,9 @@ const ClientNotification = () => {
                 <Input
                   id="phoneNumber"
                   value={verificationData.phoneNumber}
-                  onChange={(e) => setVerificationData(prev => ({ ...prev, phoneNumber: e.target.value }))}
+                  onChange={handlePhoneNumberChange}
                   placeholder="(XX) XXXXX-XXXX"
+                  maxLength={15}
                 />
               </div>
               <Button 
