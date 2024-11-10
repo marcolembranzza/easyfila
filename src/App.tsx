@@ -12,6 +12,7 @@ import TicketRetrieval from "./pages/TicketRetrieval";
 import ClientNotification from "./pages/ClientNotification";
 import OperatorDashboard from "./pages/OperatorDashboard";
 import GeneralDisplay from "./pages/GeneralDisplay";
+import ClientView from "./pages/ClientView";
 
 const queryClient = new QueryClient();
 
@@ -32,6 +33,7 @@ const App = () => (
                 <Route path="/notification/:ticketId" element={<ClientNotification />} />
                 <Route path="/operator" element={<OperatorDashboard />} />
                 <Route path="/display" element={<GeneralDisplay />} />
+                <Route path="/client" element={<ClientView />} />
               </Routes>
             </main>
             <FloatingNav />

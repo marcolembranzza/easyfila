@@ -1,28 +1,56 @@
-import { useState } from "react";
-import { QueueItem } from "@/types";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Ticket, Bell } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
-export const ClientView = () => {
-  const [ticket] = useState<QueueItem>({
-    id: "1",
-    number: 1,
-    client_name: "John Doe",
-    phone_number: "(11) 99999-9999", // Added the required phone_number field
-    status: "waiting",
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-    estimated_time: 15
-  });
+const ClientView = () => {
+  const navigate = useNavigate();
 
   return (
-    <div className="container mx-auto py-8">
-      <h1 className="text-3xl font-bold mb-4">Your Ticket</h1>
-      <div className="bg-white rounded-lg shadow p-6">
-        <p className="text-lg"><strong>Ticket Number:</strong> #{ticket.number}</p>
-        <p className="text-lg"><strong>Client Name:</strong> {ticket.client_name}</p>
-        <p className="text-lg"><strong>Phone:</strong> {ticket.phone_number}</p>
-        <p className="text-lg"><strong>Status:</strong> {ticket.status}</p>
-        <p className="text-lg"><strong>Estimated Wait Time:</strong> {ticket.estimated_time} min</p>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 p-4">
+      <div className="container mx-auto max-w-md">
+        <h1 className="text-3xl font-bold text-center mb-8">Sistema de Senhas</h1>
+        
+        <div className="space-y-4">
+          <Card className="hover:shadow-lg transition-shadow">
+            <CardHeader className="text-center cursor-pointer" onClick={() => navigate('/ticket')}>
+              <div className="mx-auto mb-4 p-3 bg-primary/10 rounded-full w-fit">
+                <Ticket className="w-8 h-8 text-primary" />
+              </div>
+              <CardTitle>Retirar Senha</CardTitle>
+            </CardHeader>
+            <CardContent className="text-center">
+              <Button 
+                variant="ghost" 
+                className="w-full"
+                onClick={() => navigate('/ticket')}
+              >
+                Clique para retirar uma nova senha
+              </Button>
+            </CardContent>
+          </Card>
+
+          <Card className="hover:shadow-lg transition-shadow">
+            <CardHeader className="text-center cursor-pointer" onClick={() => navigate('/notification/search')}>
+              <div className="mx-auto mb-4 p-3 bg-primary/10 rounded-full w-fit">
+                <Bell className="w-8 h-8 text-primary" />
+              </div>
+              <CardTitle>Acompanhar Senha</CardTitle>
+            </CardHeader>
+            <CardContent className="text-center">
+              <Button 
+                variant="ghost" 
+                className="w-full"
+                onClick={() => navigate('/notification/search')}
+              >
+                Acompanhe o status da sua senha
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </div>
   );
 };
+
+export default ClientView;

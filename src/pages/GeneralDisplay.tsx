@@ -7,7 +7,7 @@ import { QRCodeSVG } from "qrcode.react";
 const GeneralDisplay = () => {
   const [currentTicket, setCurrentTicket] = useState<QueueItem | null>(null);
   const [nextTickets, setNextTickets] = useState<QueueItem[]>([]);
-  const systemUrl = window.location.origin;
+  const systemUrl = `${window.location.origin}/client`;
 
   useEffect(() => {
     const fetchQueue = async () => {
