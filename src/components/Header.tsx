@@ -8,14 +8,15 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Header = () => {
   const navigate = useNavigate();
+  const { isAuthenticated, logout: authLogout } = useAuth();
 
   const handleLogout = () => {
-    // TODO: Add actual logout logic (authentication, clearing tokens, etc.)
-    console.log("Logout clicked");
-    navigate('/'); // Navigate back to the initial screen
+    authLogout();
+    navigate('/');
   };
 
   return (
@@ -25,32 +26,34 @@ const Header = () => {
           Queue System
         </Link>
         
-        <div className="ml-auto flex items-center space-x-4">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <button className="rounded-full outline-none ring-offset-2 transition-opacity hover:opacity-80">
-                <Avatar>
-                  <AvatarFallback>
-                    <User className="h-5 w-5" />
-                  </AvatarFallback>
-                </Avatar>
-              </button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56">
-              <Link to="/profile">
-                <DropdownMenuItem className="cursor-pointer">
-                  <UserCog className="mr-2 h-4 w-4" />
-                  <span>Meu Perfil</span>
+        {isAuthenticated && (
+          <div className="ml-auto flex items-center space-x-4">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button className="rounded-full outline-none ring-offset-2 transition-opacity hover:opacity-80">
+                  <Avatar>
+                    <AvatarFallback>
+                      <User className="h-5 w-5" />
+                    </AvatarFallback>
+                  </Avatar>
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                <Link to="/profile">
+                  <DropdownMenuItem className="cursor-pointer">
+                    <UserCog className="mr-2 h-4 w-4" />
+                    <span>Meu Perfil</span>
+                  </DropdownMenuItem>
+                </Link>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={handleLogout} className="cursor-pointer text-red-600">
+                  <LogOut className="mr-2 h-4 w-4" />
+                  <span>Sair</span>
                 </DropdownMenuItem>
-              </Link>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={handleLogout} className="cursor-pointer text-red-600">
-                <LogOut className="mr-2 h-4 w-4" />
-                <span>Sair</span>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        )}
       </div>
     </header>
   );
