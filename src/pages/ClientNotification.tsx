@@ -51,7 +51,11 @@ const ClientNotification = () => {
             </div>
             <div>
               <p className="text-lg text-gray-600">Posição na fila:</p>
-              <p className="text-4xl font-bold">{queuePosition}</p>
+              {queuePosition === 0 ? (
+                <p className="text-4xl font-bold text-primary animate-pulse">Agora é sua vez!</p>
+              ) : (
+                <p className="text-4xl font-bold">{queuePosition}</p>
+              )}
             </div>
             {isVibrating && (
               <p className="text-lg font-semibold text-primary animate-pulse">
