@@ -2,10 +2,12 @@ import { useEffect, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { QueueItem } from "@/types";
 import { queueService } from "@/lib/supabase";
+import { QRCodeSVG } from "qrcode.react";
 
 const GeneralDisplay = () => {
   const [currentTicket, setCurrentTicket] = useState<QueueItem | null>(null);
   const [nextTickets, setNextTickets] = useState<QueueItem[]>([]);
+  const systemUrl = `${window.location.origin}/display`;
 
   useEffect(() => {
     const fetchQueue = async () => {
@@ -67,7 +69,7 @@ const GeneralDisplay = () => {
         </Card>
 
         {/* Próximas Senhas */}
-        <Card>
+        <Card className="mb-8">
           <CardContent className="p-8">
             <h2 className="text-2xl font-semibold text-center mb-6">Próximas Senhas</h2>
             <div className="space-y-6">
@@ -93,6 +95,19 @@ const GeneralDisplay = () => {
                 </div>
               )}
             </div>
+          </CardContent>
+        </Card>
+
+        {/* QR Code */}
+        <Card>
+          <CardContent className="p-8 flex flex-col items-center">
+            <h2 className="text-2xl font-semibold text-center mb-6">Acompanhe as senhas pelo celular</h2>
+            <div className="bg-white p-4 rounded-lg shadow-sm">
+              <QRCodeSVG value={systemUrl} size={200} />
+            </div>
+            <p className="mt-4 text-gray-600 text-center">
+              Escaneie o QR Code para acompanhar as senhas em tempo real no seu celular
+            </p>
           </CardContent>
         </Card>
       </div>
