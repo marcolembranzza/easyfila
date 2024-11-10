@@ -8,7 +8,11 @@ const Index = () => {
 
   const handleRoleSelect = (selectedRole: 'operator' | 'client') => {
     setRole(selectedRole);
-    navigate(selectedRole === 'operator' ? '/operator' : '/client');
+    if (selectedRole === 'operator') {
+      navigate('/operator');
+    } else {
+      navigate('/ticket');
+    }
   };
 
   return (

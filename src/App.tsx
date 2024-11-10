@@ -8,6 +8,7 @@ import Header from "./components/Header";
 import Index from "./pages/Index";
 import OperatorDashboard from "./pages/OperatorDashboard";
 import ClientView from "./pages/ClientView";
+import TicketRetrieval from "./pages/TicketRetrieval";
 
 const queryClient = new QueryClient();
 
@@ -25,6 +26,7 @@ const App = () => (
                 <Route path="/" element={<Index />} />
                 <Route path="/operator" element={<OperatorDashboard />} />
                 <Route path="/client" element={<ClientView />} />
+                <Route path="/ticket" element={<TicketRetrieval />} />
               </Routes>
             </main>
           </div>
