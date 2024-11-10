@@ -12,6 +12,7 @@ export interface QueueItem {
   updated_at: string;
   estimated_time?: number;
   notes?: string;
+  priority: boolean;
 }
 
 export interface User {

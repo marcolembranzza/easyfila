@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Ticket } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { queueService } from "@/lib/supabase";
@@ -11,6 +12,7 @@ import { queueService } from "@/lib/supabase";
 const TicketRetrieval = () => {
   const [name, setName] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
+  const [priority, setPriority] = useState("normal");
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -54,7 +56,7 @@ const TicketRetrieval = () => {
 
     try {
       setIsLoading(true);
-      const ticket = await queueService.createTicket(name, phoneNumber);
+      const ticket = await queueService.createTicket(name, phoneNumber, priority === "priority");
       
       if (ticket) {
         toast({
@@ -103,6 +105,23 @@ const TicketRetrieval = () => {
                 onChange={handlePhoneNumberChange}
                 maxLength={15}
               />
+            </div>
+            <div className="space-y-2">
+              <Label>Tipo de Atendimento</Label>
+              <RadioGroup
+                value={priority}
+                onValueChange={setPriority}
+                className="flex flex-col space-y-2"
+              >
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="normal" id="normal" />
+                  <Label htmlFor="normal">Normal</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="priority" id="priority" />
+                  <Label htmlFor="priority">Preferencial</Label>
+                </div>
+              </RadioGroup>
             </div>
             <Button 
               className="w-full"
