@@ -8,9 +8,12 @@ interface QueueListProps {
 }
 
 export const QueueList = ({ items, onStatusChange, isOperator = false }: QueueListProps) => {
+  // Sort items by number to ensure they are displayed in order
+  const sortedItems = [...items].sort((a, b) => a.number - b.number);
+
   return (
     <div className="space-y-4">
-      {items.map((item) => (
+      {sortedItems.map((item) => (
         <QueueCard
           key={item.id}
           item={item}

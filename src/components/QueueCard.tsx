@@ -1,8 +1,6 @@
-import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Clock, User, Phone } from "lucide-react";
 import { QueueItem } from "@/types";
+import { Clock, User, Phone } from "lucide-react";
 
 interface QueueCardProps {
   item: QueueItem;
@@ -11,66 +9,76 @@ interface QueueCardProps {
 }
 
 export const QueueCard = ({ item, onStatusChange, isOperator = false }: QueueCardProps) => {
-  const statusColors = {
-    waiting: "bg-status-waiting",
-    inProgress: "bg-status-inProgress",
-    completed: "bg-status-completed",
-    cancelled: "bg-status-cancelled",
+  const getStatusColor = () => {
+    switch (item.status) {
+      case 'waiting': return 'bg-yellow-100 text-yellow-800';
+      case 'inProgress': return 'bg-blue-100 text-blue-800';
+      case 'completed': return 'bg-green-100 text-green-800';
+      case 'cancelled': return 'bg-red-100 text-red-800';
+      default: return 'bg-gray-100 text-gray-800';
+    }
   };
 
   return (
-    <Card className="p-4 mb-4 hover:shadow-lg transition-shadow">
-      <div className="flex justify-between items-start">
-        <div>
-          <div className="flex items-center gap-2">
-            <span className="text-2xl font-bold">#{item.number}</span>
-            <Badge className={statusColors[item.status]}>
-              {item.status.charAt(0).toUpperCase() + item.status.slice(1)}
-            </Badge>
+    <div className="bg-white border rounded-lg p-4 shadow-sm flex items-center justify-between">
+      <div className="flex items-center space-x-4 w-full">
+        {/* Ticket Number Prominently Displayed */}
+        <div className="text-3xl font-bold text-primary w-16 text-center">
+          {item.number}
+        </div>
+        
+        <div className="flex-grow space-y-2">
+          <div className="flex items-center space-x-2">
+            <User className="h-5 w-5 text-gray-500" />
+            <span className="font-medium">{item.client_name}</span>
           </div>
-          <div className="flex items-center gap-2 mt-2 text-gray-600">
-            <User size={16} />
-            <span>{item.client_name}</span>
-          </div>
-          <div className="flex items-center gap-2 mt-1 text-gray-600">
-            <Phone size={16} />
+          
+          <div className="flex items-center space-x-2">
+            <Phone className="h-5 w-5 text-gray-500" />
             <span>{item.phone_number}</span>
           </div>
-          {item.estimated_time && (
-            <div className="flex items-center gap-2 mt-1 text-gray-600">
-              <Clock size={16} />
-              <span>~{item.estimated_time} min</span>
+          
+          {item.notes && (
+            <div className="text-sm text-gray-600 italic">
+              {item.notes}
             </div>
           )}
         </div>
         
-        {isOperator && item.status !== 'completed' && item.status !== 'cancelled' && (
-          <div className="flex gap-2">
+        <div className="flex items-center space-x-2">
+          <Clock className="h-5 w-5 text-gray-500" />
+          <span>{item.estimated_time || 15} min</span>
+          
+          <span 
+            className={`px-2 py-1 rounded text-xs font-semibold ${getStatusColor()}`}
+          >
+            {item.status}
+          </span>
+        </div>
+        
+        {isOperator && onStatusChange && (
+          <div className="flex space-x-2">
             {item.status === 'waiting' && (
-              <Button
-                variant="default"
-                onClick={() => onStatusChange?.(item.id, 'inProgress')}
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => onStatusChange(item.id, 'inProgress')}
               >
-                Start
+                Iniciar
               </Button>
             )}
             {item.status === 'inProgress' && (
-              <Button
-                variant="default"
-                onClick={() => onStatusChange?.(item.id, 'completed')}
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => onStatusChange(item.id, 'completed')}
               >
-                Complete
+                Concluir
               </Button>
             )}
-            <Button
-              variant="destructive"
-              onClick={() => onStatusChange?.(item.id, 'cancelled')}
-            >
-              Cancel
-            </Button>
           </div>
         )}
       </div>
-    </Card>
+    </div>
   );
 };
