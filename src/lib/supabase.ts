@@ -7,10 +7,10 @@ const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS
 export const supabase = createClient(supabaseUrl, supabaseKey);
 
 export const queueService = {
-  async createTicket(clientName: string): Promise<QueueItem> {
+  async createTicket(clientName: string, phoneNumber: string): Promise<QueueItem> {
     const { data, error } = await supabase
       .from('queue_items')
-      .insert([{ client_name: clientName, status: 'waiting' }])
+      .insert([{ client_name: clientName, phone_number: phoneNumber, status: 'waiting' }])
       .select()
       .single();
 
