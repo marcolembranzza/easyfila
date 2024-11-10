@@ -17,7 +17,7 @@ const GeneralDisplay = () => {
         const inProgress = items.find(item => item.status === 'inProgress');
         const waiting = items
           .filter(item => item.status === 'waiting')
-          .slice(0, 3);
+          .slice(0, 5); // Changed from 3 to 5
         
         setCurrentTicket(inProgress || null);
         setNextTickets(waiting);
@@ -32,7 +32,7 @@ const GeneralDisplay = () => {
       const inProgress = items.find(item => item.status === 'inProgress');
       const waiting = items
         .filter(item => item.status === 'waiting')
-        .slice(0, 3);
+        .slice(0, 5); // Changed from 3 to 5
       
       setCurrentTicket(inProgress || null);
       setNextTickets(waiting);
