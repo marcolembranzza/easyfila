@@ -19,10 +19,15 @@ export const QueueCard = ({ item, onStatusChange, isOperator = false }: QueueCar
     }
   };
 
+  const handleStatusChange = async (newStatus: QueueItem['status']) => {
+    if (onStatusChange) {
+      await onStatusChange(item.id, newStatus);
+    }
+  };
+
   return (
     <div className="bg-white border rounded-lg p-4 shadow-sm flex items-center justify-between">
       <div className="flex items-center space-x-4 w-full">
-        {/* Ticket Number Prominently Displayed */}
         <div className="text-3xl font-bold text-primary w-16 text-center">
           {item.number}
         </div>
@@ -62,7 +67,7 @@ export const QueueCard = ({ item, onStatusChange, isOperator = false }: QueueCar
               <Button 
                 variant="outline" 
                 size="sm" 
-                onClick={() => onStatusChange(item.id, 'inProgress')}
+                onClick={() => handleStatusChange('inProgress')}
               >
                 Iniciar
               </Button>
@@ -71,7 +76,7 @@ export const QueueCard = ({ item, onStatusChange, isOperator = false }: QueueCar
               <Button 
                 variant="outline" 
                 size="sm" 
-                onClick={() => onStatusChange(item.id, 'completed')}
+                onClick={() => handleStatusChange('completed')}
               >
                 Concluir
               </Button>

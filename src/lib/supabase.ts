@@ -32,7 +32,7 @@ export const queueService = {
   async updateStatus(id: string, status: QueueItem['status']): Promise<void> {
     const { error } = await supabase
       .from('queue_items')
-      .update({ status })
+      .update({ status, updated_at: new Date().toISOString() })
       .eq('id', id);
 
     if (error) throw error;
@@ -44,8 +44,9 @@ export const queueService = {
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'queue_items' },
-        () => {
-          this.getQueueItems().then(callback);
+        async (payload) => {
+          const items = await this.getQueueItems();
+          callback(items);
         }
       )
       .subscribe();
