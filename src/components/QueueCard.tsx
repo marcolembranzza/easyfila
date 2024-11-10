@@ -10,8 +10,8 @@ interface QueueCardProps {
 }
 
 export const QueueCard = ({ item, onStatusChange, isOperator = false }: QueueCardProps) => {
-  const { user } = useAuth();
-  const isClient = user?.role === 'client';
+  const auth = useAuth();
+  const isClient = auth?.user?.role === 'client';
 
   const getStatusColor = () => {
     switch (item.status) {
