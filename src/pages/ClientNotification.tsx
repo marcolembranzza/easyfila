@@ -21,18 +21,36 @@ const ClientNotification = () => {
     phoneNumber: ''
   });
 
+  const formatPhoneNumber = (value: string) => {
+    const numbers = value.replace(/\D/g, "");
+    if (numbers.length <= 2) return `(${numbers}`;
+    if (numbers.length <= 6) return `(${numbers.slice(0, 2)}) ${numbers.slice(2)}`;
+    if (numbers.length <= 10) return `(${numbers.slice(0, 2)}) ${numbers.slice(2, 6)}-${numbers.slice(6)}`;
+    return `(${numbers.slice(0, 2)}) ${numbers.slice(2, 7)}-${numbers.slice(7, 11)}`;
+  };
+
+  const normalizePhoneNumber = (phone: string) => {
+    return phone.replace(/\D/g, "");
+  };
+
   const verifyTicket = async () => {
     try {
       const items = await queueService.getQueueItems();
-      const ticket = items.find(item => 
-        item.id === ticketId && 
-        item.client_name.toLowerCase() === verificationData.name.toLowerCase() &&
-        item.phone_number === verificationData.phoneNumber
-      );
+      const ticket = items.find(item => {
+        const normalizedStoredPhone = normalizePhoneNumber(item.phone_number);
+        const normalizedInputPhone = normalizePhoneNumber(verificationData.phoneNumber);
+        return item.id === ticketId && 
+               item.client_name.toLowerCase() === verificationData.name.toLowerCase() &&
+               normalizedStoredPhone === normalizedInputPhone;
+      });
 
       if (ticket) {
         setIsVerified(true);
         setCurrentTicket(ticket);
+        toast({
+          title: "Verificação bem-sucedida",
+          description: "Seus dados foram verificados com sucesso.",
+        });
       } else {
         toast({
           title: "Verificação falhou",
@@ -41,12 +59,18 @@ const ClientNotification = () => {
         });
       }
     } catch (error) {
+      console.error('Erro na verificação:', error);
       toast({
         title: "Erro",
         description: "Não foi possível verificar seus dados.",
         variant: "destructive"
       });
     }
+  };
+
+  const handlePhoneNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const formattedNumber = formatPhoneNumber(e.target.value);
+    setVerificationData(prev => ({ ...prev, phoneNumber: formattedNumber }));
   };
 
   useEffect(() => {
@@ -100,19 +124,6 @@ const ClientNotification = () => {
     const interval = setInterval(fetchQueuePosition, 5000);
     return () => clearInterval(interval);
   }, [ticketId, isVibrating, toast, isVerified]);
-
-  const formatPhoneNumber = (value: string) => {
-    const numbers = value.replace(/\D/g, "");
-    if (numbers.length <= 2) return `(${numbers}`;
-    if (numbers.length <= 6) return `(${numbers.slice(0, 2)}) ${numbers.slice(2)}`;
-    if (numbers.length <= 10) return `(${numbers.slice(0, 2)}) ${numbers.slice(2, 6)}-${numbers.slice(6)}`;
-    return `(${numbers.slice(0, 2)}) ${numbers.slice(2, 7)}-${numbers.slice(7, 11)}`;
-  };
-
-  const handlePhoneNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const formattedNumber = formatPhoneNumber(e.target.value);
-    setVerificationData(prev => ({ ...prev, phoneNumber: formattedNumber }));
-  };
 
   const getStatusMessage = () => {
     if (!currentTicket) return "Carregando...";
