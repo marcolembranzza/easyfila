@@ -3,6 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { QueueItem } from "@/types";
 import { queueService } from "@/lib/supabase";
 import { QRCodeSVG } from "qrcode.react";
+import { Star } from "lucide-react";
 
 const GeneralDisplay = () => {
   const [currentTicket, setCurrentTicket] = useState<QueueItem | null>(null);
@@ -56,8 +57,14 @@ const GeneralDisplay = () => {
                 <div className="text-7xl font-bold mb-4">
                   {currentTicket.number}
                 </div>
-                <div className="text-3xl">
-                  {currentTicket.client_name}
+                <div className="text-3xl flex justify-center items-center space-x-2">
+                  <span>{currentTicket.client_name}</span>
+                  {currentTicket.priority && (
+                    <div className="flex items-center space-x-1 bg-white/20 text-white px-2 py-0.5 rounded text-sm">
+                      <Star className="h-4 w-4" />
+                      <span>Preferencial</span>
+                    </div>
+                  )}
                 </div>
               </div>
             ) : (
@@ -81,8 +88,14 @@ const GeneralDisplay = () => {
                   <div className="text-2xl font-medium text-gray-600">
                     {index + 1}º
                   </div>
-                  <div className="text-3xl font-bold">
-                    {ticket.number}
+                  <div className="text-3xl font-bold flex items-center space-x-2">
+                    <span>{ticket.number}</span>
+                    {ticket.priority && (
+                      <div className="flex items-center space-x-1 bg-primary/10 text-primary px-2 py-0.5 rounded text-sm">
+                        <Star className="h-4 w-4" />
+                        <span>Preferencial</span>
+                      </div>
+                    )}
                   </div>
                   <div className="text-xl text-gray-600">
                     {ticket.client_name}
