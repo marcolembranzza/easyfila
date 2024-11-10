@@ -8,7 +8,7 @@ import { Star } from "lucide-react";
 const GeneralDisplay = () => {
   const [currentTicket, setCurrentTicket] = useState<QueueItem | null>(null);
   const [nextTickets, setNextTickets] = useState<QueueItem[]>([]);
-  const systemUrl = `${window.location.origin}/display`;
+  const systemUrl = `${window.location.origin}/client`;
 
   useEffect(() => {
     const fetchQueue = async () => {
@@ -17,7 +17,7 @@ const GeneralDisplay = () => {
         const inProgress = items.find(item => item.status === 'inProgress');
         const waiting = items
           .filter(item => item.status === 'waiting')
-          .slice(0, 5); // Changed from 3 to 5
+          .slice(0, 5);
         
         setCurrentTicket(inProgress || null);
         setNextTickets(waiting);
@@ -32,7 +32,7 @@ const GeneralDisplay = () => {
       const inProgress = items.find(item => item.status === 'inProgress');
       const waiting = items
         .filter(item => item.status === 'waiting')
-        .slice(0, 5); // Changed from 3 to 5
+        .slice(0, 5);
       
       setCurrentTicket(inProgress || null);
       setNextTickets(waiting);
@@ -114,12 +114,12 @@ const GeneralDisplay = () => {
         {/* QR Code */}
         <Card>
           <CardContent className="p-8 flex flex-col items-center">
-            <h2 className="text-2xl font-semibold text-center mb-6">Acompanhe as senhas pelo celular</h2>
+            <h2 className="text-2xl font-semibold text-center mb-6">Retire e acompanhe sua senha pelo celular</h2>
             <div className="bg-white p-4 rounded-lg shadow-sm">
               <QRCodeSVG value={systemUrl} size={200} />
             </div>
             <p className="mt-4 text-gray-600 text-center">
-              Escaneie o QR Code para acompanhar as senhas em tempo real no seu celular
+              Escaneie o QR Code para retirar uma nova senha ou acompanhar o painel em tempo real no seu celular
             </p>
           </CardContent>
         </Card>
