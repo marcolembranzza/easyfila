@@ -1,46 +1,69 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { QueueList } from "@/components/QueueList";
 import { StatsCard } from "@/components/StatsCard";
-import { Users, Clock, CheckCircle2, BarChart } from "lucide-react";
+import { Users, Clock, CheckCircle2 } from "lucide-react";
 import { QueueItem, QueueStats } from "@/types";
-
-// Temporary mock data
-const mockQueue: QueueItem[] = [
-  {
-    id: "1",
-    number: 1,
-    clientName: "John Doe",
-    status: "waiting",
-    createdAt: new Date(),
-    updatedAt: new Date(),
-    estimatedTime: 15,
-  },
-  {
-    id: "2",
-    number: 2,
-    clientName: "Jane Smith",
-    status: "inProgress",
-    createdAt: new Date(),
-    updatedAt: new Date(),
-    estimatedTime: 10,
-  },
-];
-
-const mockStats: QueueStats = {
-  totalServed: 45,
-  averageWaitTime: 12,
-  currentQueueSize: 8,
-};
+import { queueService } from "@/lib/supabase";
+import { useToast } from "@/components/ui/use-toast";
 
 const OperatorDashboard = () => {
-  const [queue, setQueue] = useState<QueueItem[]>(mockQueue);
+  const [queue, setQueue] = useState<QueueItem[]>([]);
+  const [stats, setStats] = useState<QueueStats>({
+    totalServed: 0,
+    averageWaitTime: 0,
+    currentQueueSize: 0,
+  });
+  const { toast } = useToast();
 
-  const handleStatusChange = (id: string, newStatus: QueueItem['status']) => {
-    setQueue(queue.map(item => 
-      item.id === id 
-        ? { ...item, status: newStatus, updatedAt: new Date() }
-        : item
-    ));
+  useEffect(() => {
+    const fetchQueue = async () => {
+      try {
+        const items = await queueService.getQueueItems();
+        setQueue(items);
+        updateStats(items);
+      } catch (error) {
+        console.error('Error fetching queue:', error);
+      }
+    };
+
+    fetchQueue();
+
+    const subscription = queueService.subscribeToQueue((items) => {
+      setQueue(items);
+      updateStats(items);
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
+
+  const updateStats = (items: QueueItem[]) => {
+    const completed = items.filter(item => item.status === 'completed').length;
+    const waiting = items.filter(item => item.status === 'waiting').length;
+    const avgWaitTime = Math.round(items.reduce((acc, item) => acc + (item.estimatedTime || 0), 0) / items.length) || 0;
+
+    setStats({
+      totalServed: completed,
+      averageWaitTime: avgWaitTime,
+      currentQueueSize: waiting,
+    });
+  };
+
+  const handleStatusChange = async (id: string, newStatus: QueueItem['status']) => {
+    try {
+      await queueService.updateStatus(id, newStatus);
+      toast({
+        title: "Status atualizado",
+        description: "O status da senha foi atualizado com sucesso.",
+      });
+    } catch (error) {
+      toast({
+        title: "Erro ao atualizar status",
+        description: "Ocorreu um erro ao tentar atualizar o status da senha.",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
@@ -50,17 +73,17 @@ const OperatorDashboard = () => {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         <StatsCard
           title="Current Queue Size"
-          value={mockStats.currentQueueSize}
+          value={stats.currentQueueSize}
           icon={<Users className="text-primary" />}
         />
         <StatsCard
           title="Average Wait Time"
-          value={`${mockStats.averageWaitTime} min`}
+          value={`${stats.averageWaitTime} min`}
           icon={<Clock className="text-primary" />}
         />
         <StatsCard
           title="Total Served Today"
-          value={mockStats.totalServed}
+          value={stats.totalServed}
           icon={<CheckCircle2 className="text-primary" />}
         />
       </div>

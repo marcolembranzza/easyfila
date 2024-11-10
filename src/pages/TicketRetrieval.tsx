@@ -6,13 +6,15 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Ticket } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
+import { queueService } from "@/lib/supabase";
 
 const TicketRetrieval = () => {
   const [name, setName] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  const handleGetTicket = () => {
+  const handleGetTicket = async () => {
     if (!name.trim()) {
       toast({
         title: "Nome obrigatório",
@@ -22,15 +24,26 @@ const TicketRetrieval = () => {
       return;
     }
 
-    // In a real application, this would make an API call to get a ticket number
-    const mockTicketNumber = Math.floor(Math.random() * 100) + 1;
-
-    toast({
-      title: "Senha retirada com sucesso!",
-      description: `Sua senha é ${mockTicketNumber}`,
-    });
-
-    navigate(`/notification/${mockTicketNumber}`);
+    try {
+      setIsLoading(true);
+      const ticket = await queueService.createTicket(name);
+      
+      if (ticket) {
+        toast({
+          title: "Senha retirada com sucesso!",
+          description: `Sua senha é ${ticket.number}`,
+        });
+        navigate(`/notification/${ticket.id}`);
+      }
+    } catch (error) {
+      toast({
+        title: "Erro ao retirar senha",
+        description: "Ocorreu um erro ao tentar retirar sua senha. Tente novamente.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -57,8 +70,9 @@ const TicketRetrieval = () => {
               className="w-full"
               size="lg"
               onClick={handleGetTicket}
+              disabled={isLoading}
             >
-              Retirar Senha
+              {isLoading ? "Aguarde..." : "Retirar Senha"}
             </Button>
           </CardContent>
         </Card>
