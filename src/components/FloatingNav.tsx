@@ -25,9 +25,6 @@ const FloatingNav = () => {
           <DropdownMenuItem onClick={() => navigate('/ticket')}>
             Retirar Senha
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => navigate('/ranking')}>
-            Fila de Clientes
-          </DropdownMenuItem>
           <DropdownMenuItem onClick={() => navigate('/operator')}>
             Controle de Fila
           </DropdownMenuItem>
