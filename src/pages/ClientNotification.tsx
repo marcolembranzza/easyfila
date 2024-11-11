@@ -1,13 +1,10 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { BellRing } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { queueService } from "@/lib/supabase";
 import { QueueItem } from "@/types";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
+import { StatusDisplay } from "@/components/queue/StatusDisplay";
+import { QueuePosition } from "@/components/queue/QueuePosition";
 
 const ClientNotification = () => {
   const { ticketId } = useParams();
@@ -15,67 +12,8 @@ const ClientNotification = () => {
   const [queuePosition, setQueuePosition] = useState<number | null>(null);
   const [isVibrating, setIsVibrating] = useState(false);
   const [currentTicket, setCurrentTicket] = useState<QueueItem | null>(null);
-  const [isVerified, setIsVerified] = useState(false);
-  const [verificationData, setVerificationData] = useState({
-    name: '',
-    phoneNumber: ''
-  });
-
-  const formatPhoneNumber = (value: string) => {
-    const numbers = value.replace(/\D/g, "");
-    if (numbers.length <= 2) return `(${numbers}`;
-    if (numbers.length <= 6) return `(${numbers.slice(0, 2)}) ${numbers.slice(2)}`;
-    if (numbers.length <= 10) return `(${numbers.slice(0, 2)}) ${numbers.slice(2, 6)}-${numbers.slice(6)}`;
-    return `(${numbers.slice(0, 2)}) ${numbers.slice(2, 7)}-${numbers.slice(7, 11)}`;
-  };
-
-  const normalizePhoneNumber = (phone: string) => {
-    return phone.replace(/\D/g, "");
-  };
-
-  const verifyTicket = async () => {
-    try {
-      const items = await queueService.getQueueItems();
-      const ticket = items.find(item => {
-        const normalizedStoredPhone = normalizePhoneNumber(item.phone_number);
-        const normalizedInputPhone = normalizePhoneNumber(verificationData.phoneNumber);
-        return item.id === ticketId && 
-               item.client_name.toLowerCase() === verificationData.name.toLowerCase() &&
-               normalizedStoredPhone === normalizedInputPhone;
-      });
-
-      if (ticket) {
-        setIsVerified(true);
-        setCurrentTicket(ticket);
-        toast({
-          title: "Verificação bem-sucedida",
-          description: "Seus dados foram verificados com sucesso.",
-        });
-      } else {
-        toast({
-          title: "Verificação falhou",
-          description: "Nome ou número de telefone incorretos.",
-          variant: "destructive"
-        });
-      }
-    } catch (error) {
-      console.error('Erro na verificação:', error);
-      toast({
-        title: "Erro",
-        description: "Não foi possível verificar seus dados.",
-        variant: "destructive"
-      });
-    }
-  };
-
-  const handlePhoneNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const formattedNumber = formatPhoneNumber(e.target.value);
-    setVerificationData(prev => ({ ...prev, phoneNumber: formattedNumber }));
-  };
 
   useEffect(() => {
-    if (!isVerified) return;
-
     const fetchQueuePosition = async () => {
       try {
         const items = await queueService.getQueueItems();
@@ -123,85 +61,18 @@ const ClientNotification = () => {
     fetchQueuePosition();
     const interval = setInterval(fetchQueuePosition, 5000);
     return () => clearInterval(interval);
-  }, [ticketId, isVibrating, toast, isVerified]);
-
-  const getStatusMessage = () => {
-    if (!currentTicket) return "Carregando...";
-    if (currentTicket.status === 'inProgress') return "Agora é sua vez!";
-    if (currentTicket.status === 'completed') return "Atendimento finalizado";
-    if (currentTicket.status === 'cancelled') return "Senha cancelada";
-    return `Sua posição na fila: ${queuePosition}`;
-  };
-
-  if (!isVerified) {
-    return (
-      <div className="container mx-auto p-4 max-w-md">
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-2xl text-center">Verificar Senha</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="name">Nome</Label>
-                <Input
-                  id="name"
-                  value={verificationData.name}
-                  onChange={(e) => setVerificationData(prev => ({ ...prev, name: e.target.value }))}
-                  placeholder="Digite seu nome"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="phoneNumber">Telefone</Label>
-                <Input
-                  id="phoneNumber"
-                  value={verificationData.phoneNumber}
-                  onChange={handlePhoneNumberChange}
-                  placeholder="(XX) XXXXX-XXXX"
-                  maxLength={15}
-                />
-              </div>
-              <Button 
-                className="w-full" 
-                onClick={verifyTicket}
-              >
-                Verificar
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
+  }, [ticketId, isVibrating, toast]);
 
   return (
     <div className="container mx-auto p-4 max-w-md">
-      <Card>
-        <CardHeader className="text-center">
-          <div className="mx-auto mb-4 p-3 bg-primary/10 rounded-full w-fit">
-            <BellRing className={`w-8 h-8 text-primary ${isVibrating ? 'animate-pulse' : ''}`} />
-          </div>
-          <CardTitle className="text-2xl">Status da Fila</CardTitle>
-        </CardHeader>
-        <CardContent className="text-center">
-          <div className="space-y-4">
-            <div>
-              <p className="text-lg text-gray-600">Sua senha:</p>
-              <p className="text-4xl font-bold text-primary">#{currentTicket?.number}</p>
-            </div>
-            <div>
-              <p className="text-4xl font-bold text-primary">
-                {getStatusMessage()}
-              </p>
-            </div>
-            {isVibrating && currentTicket?.status === 'waiting' && (
-              <p className="text-lg font-semibold text-primary animate-pulse">
-                Prepare-se! Sua vez está chegando!
-              </p>
-            )}
-          </div>
-        </CardContent>
-      </Card>
+      <StatusDisplay 
+        currentTicket={currentTicket} 
+        isVibrating={isVibrating} 
+      />
+      <QueuePosition 
+        queuePosition={queuePosition} 
+        isVibrating={isVibrating} 
+      />
     </div>
   );
 };
