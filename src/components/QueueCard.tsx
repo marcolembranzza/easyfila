@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { QueueItem } from "@/types";
-import { Clock, User, Phone, Star } from "lucide-react";
+import { Clock, User, Star } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 
 interface QueueCardProps {
@@ -57,13 +57,6 @@ export const QueueCard = ({ item, onStatusChange, isOperator = false }: QueueCar
               </div>
             )}
           </div>
-          
-          {!isClient && (
-            <div className="flex items-center space-x-2">
-              <Phone className="h-5 w-5 text-gray-500" />
-              <span>{item.phone_number}</span>
-            </div>
-          )}
           
           {item.notes && (
             <div className="text-sm text-gray-600 italic">
