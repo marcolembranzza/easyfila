@@ -18,14 +18,6 @@ const Index = () => {
           >
             Retirar Senha
           </Button>
-          
-          <Button
-            className="w-full text-lg py-6"
-            variant="secondary"
-            onClick={() => navigate('/notification/123')}
-          >
-            Acompanhar Senha
-          </Button>
 
           <Button
             className="w-full text-lg py-6"
