@@ -17,7 +17,7 @@ export type Database = {
           id: string
           notes: string | null
           number: number
-          phone_number: string
+          phone_number: string | null
           priority: boolean
           status: string
           updated_at: string
@@ -29,7 +29,7 @@ export type Database = {
           id?: string
           notes?: string | null
           number?: number
-          phone_number: string
+          phone_number?: string | null
           priority?: boolean
           status: string
           updated_at?: string
@@ -41,7 +41,7 @@ export type Database = {
           id?: string
           notes?: string | null
           number?: number
-          phone_number?: string
+          phone_number?: string | null
           priority?: boolean
           status?: string
           updated_at?: string
