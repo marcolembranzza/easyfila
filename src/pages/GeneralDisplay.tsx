@@ -83,13 +83,15 @@ const GeneralDisplay = () => {
               {nextTickets.map((ticket, index) => (
                 <div 
                   key={ticket.id}
-                  className="flex justify-between items-center border-b last:border-0 pb-4 last:pb-0"
+                  className={`flex justify-between items-center border-b last:border-0 pb-4 last:pb-0 ${
+                    index === 0 ? 'bg-primary/5 p-4 rounded-lg shadow-md border border-primary/20' : ''
+                  }`}
                 >
-                  <div className="text-2xl font-medium text-gray-600">
+                  <div className={`text-2xl font-medium ${index === 0 ? 'text-primary' : 'text-gray-600'}`}>
                     {index + 1}º
                   </div>
                   <div className="text-3xl font-bold flex items-center space-x-2">
-                    <span>{ticket.number}</span>
+                    <span className={index === 0 ? 'text-primary' : ''}>{ticket.number}</span>
                     {ticket.priority && (
                       <div className="flex items-center space-x-1 bg-primary/10 text-primary px-2 py-0.5 rounded text-sm">
                         <Star className="h-4 w-4" />
@@ -97,7 +99,7 @@ const GeneralDisplay = () => {
                       </div>
                     )}
                   </div>
-                  <div className="text-xl text-gray-600">
+                  <div className={`text-xl ${index === 0 ? 'text-primary font-medium' : 'text-gray-600'}`}>
                     {ticket.client_name}
                   </div>
                 </div>
