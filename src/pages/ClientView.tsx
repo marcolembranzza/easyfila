@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Ticket, Bell, LayoutDashboard } from "lucide-react";
+import { Ticket, LayoutDashboard } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 const ClientView = () => {
@@ -35,7 +35,7 @@ const ClientView = () => {
               <div className="mx-auto mb-4 p-3 bg-primary/10 rounded-full w-fit">
                 <LayoutDashboard className="w-8 h-8 text-primary" />
               </div>
-              <CardTitle>Acompanhar Painel</CardTitle>
+              <CardTitle>Acompanhar Senha</CardTitle>
             </CardHeader>
             <CardContent className="text-center">
               <Button 
@@ -44,24 +44,6 @@ const ClientView = () => {
                 onClick={() => navigate('/display')}
               >
                 Visualize o painel de senhas em tempo real
-              </Button>
-            </CardContent>
-          </Card>
-
-          <Card className="hover:shadow-lg transition-shadow">
-            <CardHeader className="text-center cursor-pointer" onClick={() => navigate('/notification/search')}>
-              <div className="mx-auto mb-4 p-3 bg-primary/10 rounded-full w-fit">
-                <Bell className="w-8 h-8 text-primary" />
-              </div>
-              <CardTitle>Consultar Senha</CardTitle>
-            </CardHeader>
-            <CardContent className="text-center">
-              <Button 
-                variant="ghost" 
-                className="w-full"
-                onClick={() => navigate('/notification/search')}
-              >
-                Consulte o status da sua senha
               </Button>
             </CardContent>
           </Card>
