@@ -26,7 +26,7 @@ const FloatingNav = () => {
             Retirar Senha
           </DropdownMenuItem>
           <DropdownMenuItem onClick={() => navigate('/operator')}>
-            Controle de Fila
+            Painel Operador
           </DropdownMenuItem>
           <DropdownMenuItem onClick={() => navigate('/display')}>
             Painel Geral
