@@ -2,8 +2,8 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Ticket } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
@@ -35,7 +35,7 @@ const TicketRetrieval = () => {
           title: "Senha retirada com sucesso!",
           description: `Sua senha é ${ticket.number}`,
         });
-        navigate(`/notification/${ticket.id}`);
+        navigate('/display');
       }
     } catch (error) {
       toast({
