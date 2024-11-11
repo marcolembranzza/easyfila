@@ -13,13 +13,6 @@ const Index = () => {
         <div className="space-y-4">
           <Button
             className="w-full text-lg py-6"
-            onClick={() => navigate('/ranking')}
-          >
-            Ver Fila
-          </Button>
-          
-          <Button
-            className="w-full text-lg py-6"
             variant="outline"
             onClick={() => navigate('/ticket')}
           >
