@@ -11,29 +11,10 @@ import { queueService } from "@/lib/supabase";
 
 const TicketRetrieval = () => {
   const [name, setName] = useState("");
-  const [phoneNumber, setPhoneNumber] = useState("");
   const [priority, setPriority] = useState("normal");
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
-
-  const validatePhoneNumber = (phone: string) => {
-    const phoneRegex = /^\(\d{2}\) \d{4,5}-\d{4}$/;
-    return phoneRegex.test(phone);
-  };
-
-  const formatPhoneNumber = (value: string) => {
-    const numbers = value.replace(/\D/g, "");
-    if (numbers.length <= 2) return `(${numbers}`;
-    if (numbers.length <= 6) return `(${numbers.slice(0, 2)}) ${numbers.slice(2)}`;
-    if (numbers.length <= 10) return `(${numbers.slice(0, 2)}) ${numbers.slice(2, 6)}-${numbers.slice(6)}`;
-    return `(${numbers.slice(0, 2)}) ${numbers.slice(2, 7)}-${numbers.slice(7, 11)}`;
-  };
-
-  const handlePhoneNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const formattedNumber = formatPhoneNumber(e.target.value);
-    setPhoneNumber(formattedNumber);
-  };
 
   const handleGetTicket = async () => {
     if (!name.trim()) {
@@ -45,18 +26,9 @@ const TicketRetrieval = () => {
       return;
     }
 
-    if (!validatePhoneNumber(phoneNumber)) {
-      toast({
-        title: "Telefone inválido",
-        description: "Por favor, insira um telefone válido no formato (XX) XXXXX-XXXX.",
-        variant: "destructive",
-      });
-      return;
-    }
-
     try {
       setIsLoading(true);
-      const ticket = await queueService.createTicket(name, phoneNumber, priority === "priority");
+      const ticket = await queueService.createTicket(name, "", priority === "priority");
       
       if (ticket) {
         toast({
@@ -94,16 +66,6 @@ const TicketRetrieval = () => {
                 placeholder="Digite seu nome"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="phoneNumber">Telefone (com DDD)</Label>
-              <Input
-                id="phoneNumber"
-                placeholder="(XX) XXXXX-XXXX"
-                value={phoneNumber}
-                onChange={handlePhoneNumberChange}
-                maxLength={15}
               />
             </div>
             <div className="space-y-2">
