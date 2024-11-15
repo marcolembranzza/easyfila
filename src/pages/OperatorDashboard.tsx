@@ -106,7 +106,7 @@ const OperatorDashboard = () => {
 
   const handleResetQueue = async () => {
     try {
-      const { error } = await supabase.rpc('clear_queue_items', {});
+      const { error } = await supabase.rpc('clear_queue_items');
       if (error) throw error;
       
       // Reset stats immediately after clearing the queue
@@ -123,6 +123,7 @@ const OperatorDashboard = () => {
         description: "Todas as informações da fila foram apagadas com sucesso.",
       });
     } catch (error) {
+      console.error('Error resetting queue:', error);
       toast({
         title: "Erro ao resetar fila",
         description: "Ocorreu um erro ao tentar resetar a fila.",
