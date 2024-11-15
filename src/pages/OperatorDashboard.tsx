@@ -66,6 +66,16 @@ const OperatorDashboard = () => {
   const handleStatusChange = async (id: string, newStatus: QueueItem['status']) => {
     try {
       await queueService.updateStatus(id, newStatus);
+      // Immediately update the local queue state
+      const updatedQueue = queue.map(item => {
+        if (item.id === id) {
+          return { ...item, status: newStatus, updated_at: new Date().toISOString() };
+        }
+        return item;
+      });
+      setQueue(updatedQueue);
+      updateStats([...updatedQueue]);
+      
       toast({
         title: "Status atualizado",
         description: "O status da senha foi atualizado com sucesso.",
@@ -132,9 +142,10 @@ const OperatorDashboard = () => {
           schema: 'public', 
           table: 'queue_items'
         },
-        (payload) => {
+        async (payload) => {
           console.log('Realtime update received:', payload);
-          fetchQueue();
+          // Immediately fetch fresh data after any change
+          await fetchQueue();
         }
       )
       .subscribe((status) => {
