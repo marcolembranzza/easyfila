@@ -1,11 +1,24 @@
 import { useEffect, useState } from "react";
 import { QueueList } from "@/components/QueueList";
 import { StatsCard } from "@/components/StatsCard";
-import { Users, Clock, CheckCircle2 } from "lucide-react";
+import { Users, Clock, CheckCircle2, Trash2 } from "lucide-react";
 import { QueueItem, QueueStats } from "@/types";
 import { queueService } from "@/lib/supabase";
 import { useToast } from "@/components/ui/use-toast";
 import { differenceInMinutes } from "date-fns";
+import { Button } from "@/components/ui/button";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { supabase } from "@/integrations/supabase/client";
 
 const OperatorDashboard = () => {
   const [queue, setQueue] = useState<QueueItem[]>([]);
@@ -16,20 +29,20 @@ const OperatorDashboard = () => {
   });
   const { toast } = useToast();
 
-  useEffect(() => {
-    const fetchQueue = async () => {
-      try {
-        const items = await queueService.getQueueItems();
-        const activeItems = items.filter(
-          item => item.status !== 'completed' && item.status !== 'cancelled'
-        );
-        setQueue(activeItems);
-        updateStats(items);
-      } catch (error) {
-        console.error('Error fetching queue:', error);
-      }
-    };
+  const fetchQueue = async () => {
+    try {
+      const items = await queueService.getQueueItems();
+      const activeItems = items.filter(
+        item => item.status !== 'completed' && item.status !== 'cancelled'
+      );
+      setQueue(activeItems);
+      updateStats(items);
+    } catch (error) {
+      console.error('Error fetching queue:', error);
+    }
+  };
 
+  useEffect(() => {
     fetchQueue();
     const interval = setInterval(fetchQueue, 5000);
     const subscription = queueService.subscribeToQueue((items) => {
@@ -57,7 +70,6 @@ const OperatorDashboard = () => {
 
     const waiting = items.filter(item => item.status === 'waiting').length;
 
-    // Calculate average wait time for completed items
     const completedItems = items.filter(item => item.status === 'completed');
     const totalWaitTime = completedItems.reduce((acc, item) => {
       const startTime = new Date(item.created_at);
@@ -92,9 +104,54 @@ const OperatorDashboard = () => {
     }
   };
 
+  const handleResetQueue = async () => {
+    try {
+      const { error } = await supabase.rpc('clear_queue_items');
+      if (error) throw error;
+      
+      toast({
+        title: "Fila resetada",
+        description: "Todas as informações da fila foram apagadas com sucesso.",
+      });
+      
+      await fetchQueue();
+    } catch (error) {
+      toast({
+        title: "Erro ao resetar fila",
+        description: "Ocorreu um erro ao tentar resetar a fila.",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <div className="container mx-auto py-8">
-      <h1 className="text-3xl font-bold mb-8">Painel do Operador</h1>
+      <div className="flex justify-between items-center mb-8">
+        <h1 className="text-3xl font-bold">Painel do Operador</h1>
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
+            <Button variant="destructive" className="flex items-center gap-2">
+              <Trash2 className="h-4 w-4" />
+              Resetar Fila
+            </Button>
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Você tem certeza?</AlertDialogTitle>
+              <AlertDialogDescription>
+                Esta ação irá apagar todas as informações da fila, incluindo histórico.
+                Esta ação não pode ser desfeita.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancelar</AlertDialogCancel>
+              <AlertDialogAction onClick={handleResetQueue}>
+                Sim, resetar fila
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      </div>
       
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         <StatsCard
