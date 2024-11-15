@@ -7,7 +7,7 @@ const Index = () => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-blue-100">
       <div className="text-center space-y-8 p-8 bg-white rounded-xl shadow-lg max-w-md w-full">
-        <h1 className="text-4xl font-bold text-gray-900">Sistema de Filas</h1>
+        <h1 className="text-4xl font-bold text-gray-900">EasyFila</h1>
         <p className="text-gray-600">Selecione uma opção</p>
         
         <div className="space-y-4">
