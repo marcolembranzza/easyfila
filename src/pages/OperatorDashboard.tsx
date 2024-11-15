@@ -106,7 +106,7 @@ const OperatorDashboard = () => {
 
   const handleResetQueue = async () => {
     try {
-      const { error } = await supabase.rpc('clear_queue_items');
+      const { error } = await supabase.rpc('clear_queue_items', {});
       if (error) throw error;
       
       toast({
