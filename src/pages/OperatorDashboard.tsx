@@ -119,10 +119,10 @@ const OperatorDashboard = () => {
       }
     };
 
-    // Busca inicial dos dados
+    // Initial data fetch
     fetchQueue();
     
-    // Inscreve-se para atualizações em tempo real
+    // Subscribe to real-time updates
     const channel = supabase
       .channel('queue_changes')
       .on(
@@ -130,8 +130,7 @@ const OperatorDashboard = () => {
         { 
           event: '*', 
           schema: 'public', 
-          table: 'queue_items',
-          filter: `status=in.(waiting,inProgress)`
+          table: 'queue_items'
         },
         (payload) => {
           console.log('Realtime update received:', payload);
