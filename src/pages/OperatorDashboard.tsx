@@ -31,7 +31,7 @@ const OperatorDashboard = () => {
     };
 
     fetchQueue();
-
+    const interval = setInterval(fetchQueue, 5000);
     const subscription = queueService.subscribeToQueue((items) => {
       const activeItems = items.filter(
         item => item.status !== 'completed' && item.status !== 'cancelled'
@@ -41,6 +41,7 @@ const OperatorDashboard = () => {
     });
 
     return () => {
+      clearInterval(interval);
       subscription.unsubscribe();
     };
   }, []);

@@ -60,7 +60,14 @@ const ClientNotification = () => {
 
     fetchQueuePosition();
     const interval = setInterval(fetchQueuePosition, 5000);
-    return () => clearInterval(interval);
+    const subscription = queueService.subscribeToQueue(async () => {
+      await fetchQueuePosition();
+    });
+
+    return () => {
+      clearInterval(interval);
+      subscription.unsubscribe();
+    };
   }, [ticketId, isVibrating, toast]);
 
   return (

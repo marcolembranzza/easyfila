@@ -27,8 +27,7 @@ const GeneralDisplay = () => {
     };
 
     fetchQueue();
-
-    // Subscribe to real-time updates
+    const interval = setInterval(fetchQueue, 5000);
     const subscription = queueService.subscribeToQueue((items) => {
       const inProgress = items.find(item => item.status === 'inProgress');
       const waiting = items
@@ -40,6 +39,7 @@ const GeneralDisplay = () => {
     });
 
     return () => {
+      clearInterval(interval);
       subscription.unsubscribe();
     };
   }, []);

@@ -25,9 +25,11 @@ const QueueRanking = () => {
     };
 
     fetchQueue();
-
+    const interval = setInterval(fetchQueue, 5000);
     const subscription = queueService.subscribeToQueue(setQueueItems);
+
     return () => {
+      clearInterval(interval);
       subscription.unsubscribe();
     };
   }, []);
