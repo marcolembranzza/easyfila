@@ -8,19 +8,15 @@ export const playNotificationSound = async () => {
     await audio.load();
     console.log('Áudio carregado, tentando reproduzir...');
     
-    // Tenta reproduzir e aguarda a conclusão
-    const playPromise = await audio.play();
-    
-    if (playPromise !== undefined) {
-      playPromise
-        .then(() => {
-          console.log('Som reproduzido com sucesso!');
-        })
-        .catch((error) => {
-          console.error('Erro ao reproduzir som:', error);
-        });
+    try {
+      await audio.play();
+      console.log('Som reproduzido com sucesso!');
+    } catch (error) {
+      console.error('Erro ao reproduzir som:', error);
+      throw error;
     }
   } catch (error) {
     console.error('Erro ao inicializar áudio:', error);
+    throw error;
   }
 };
