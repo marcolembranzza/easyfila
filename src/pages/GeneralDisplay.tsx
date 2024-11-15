@@ -47,7 +47,7 @@ const GeneralDisplay = () => {
   return (
     <div className="min-h-screen bg-gray-100 p-4">
       <div className="container mx-auto max-w-7xl">
-        <h1 className="text-4xl font-bold text-center mb-8">Painel de Senhas</h1>
+        <h1 className="text-4xl font-bold text-center mb-8">Painel Geral</h1>
         
         <div className="grid grid-cols-1 lg:grid-cols-[1fr,400px] gap-8">
           {/* Coluna principal com as senhas */}
