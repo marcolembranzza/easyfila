@@ -119,18 +119,28 @@ const OperatorDashboard = () => {
       }
     };
 
+    // Busca inicial dos dados
     fetchQueue();
     
+    // Inscreve-se para atualizações em tempo real
     const channel = supabase
       .channel('queue_changes')
       .on(
         'postgres_changes',
-        { event: '*', schema: 'public', table: 'queue_items' },
-        () => {
+        { 
+          event: '*', 
+          schema: 'public', 
+          table: 'queue_items',
+          filter: `status=in.(waiting,inProgress)`
+        },
+        (payload) => {
+          console.log('Realtime update received:', payload);
           fetchQueue();
         }
       )
-      .subscribe();
+      .subscribe((status) => {
+        console.log('Subscription status:', status);
+      });
 
     return () => {
       channel.unsubscribe();
