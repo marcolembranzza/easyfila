@@ -40,13 +40,22 @@ export const QueueCard = ({ item, onStatusChange, isOperator = false }: QueueCar
   const handleStatusChange = async (newStatus: QueueItem['status']) => {
     try {
       if (newStatus === 'inProgress') {
-        console.log('Tentando reproduzir som de notificação...');
-        await playNotificationSound();
-        toast({
-          title: "Notificação",
-          description: "Iniciando atendimento",
-        });
+        try {
+          await playNotificationSound();
+          toast({
+            title: "Notificação",
+            description: "Iniciando atendimento",
+          });
+        } catch (error) {
+          console.error('Erro ao reproduzir som:', error);
+          toast({
+            title: "Aviso",
+            description: "Não foi possível reproduzir o som de notificação. Verifique se o seu navegador permite reprodução de áudio.",
+            variant: "destructive",
+          });
+        }
       }
+      
       if (onStatusChange) {
         await onStatusChange(item.id, newStatus);
       }
@@ -54,7 +63,7 @@ export const QueueCard = ({ item, onStatusChange, isOperator = false }: QueueCar
       console.error('Erro ao mudar status:', error);
       toast({
         title: "Erro",
-        description: "Não foi possível reproduzir o som de notificação",
+        description: "Ocorreu um erro ao atualizar o status",
         variant: "destructive",
       });
     }
