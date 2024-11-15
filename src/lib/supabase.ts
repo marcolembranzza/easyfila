@@ -1,10 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 import { QueueItem } from '@/types';
-
-const supabaseUrl = "https://mclsaxppvuylyxxbmsvn.supabase.co";
-const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1jbHNheHBwdnV5bHl4eGJtc3ZuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzEyNjkyMjcsImV4cCI6MjA0Njg0NTIyN30.T4W4puHVY_gszZ6Yg7N5oTTkWOzHYu6Jre8q3cut6Ps";
-
-export const supabase = createClient(supabaseUrl, supabaseKey);
+import { supabase } from '@/integrations/supabase/client';
 
 export const queueService = {
   async createTicket(clientName: string, phoneNumber: string = '', priority: boolean = false): Promise<QueueItem> {
@@ -42,19 +38,5 @@ export const queueService = {
       .eq('id', id);
 
     if (error) throw error;
-  },
-
-  subscribeToQueue(callback: (items: QueueItem[]) => void) {
-    return supabase
-      .channel('queue_changes')
-      .on(
-        'postgres_changes',
-        { event: '*', schema: 'public', table: 'queue_items' },
-        async (payload) => {
-          const items = await this.getQueueItems();
-          callback(items);
-        }
-      )
-      .subscribe();
   }
 };

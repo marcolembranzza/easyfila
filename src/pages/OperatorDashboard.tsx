@@ -16,7 +16,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { supabase } from "@/lib/supabase";
+import { supabase } from "@/integrations/supabase/client";
 import { StatsGrid } from "@/components/stats/StatsGrid";
 import { QueueSection } from "@/components/queue/QueueSection";
 
@@ -106,33 +106,58 @@ const OperatorDashboard = () => {
   };
 
   useEffect(() => {
+    const channel = supabase
+      .channel('queue_changes')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'queue_items' },
+        async (payload) => {
+          const { data: items, error } = await supabase
+            .from('queue_items')
+            .select('*')
+            .order('priority', { ascending: false })
+            .order('created_at', { ascending: true });
+
+          if (error) {
+            console.error('Error fetching queue:', error);
+            return;
+          }
+
+          const activeItems = (items || []).filter(
+            item => item.status !== 'completed' && item.status !== 'cancelled'
+          );
+          
+          setQueue(activeItems);
+          updateStats(items || []);
+        }
+      )
+      .subscribe();
+
     // Initial fetch
-    const fetchQueue = async () => {
-      try {
-        const items = await queueService.getQueueItems();
-        const activeItems = items.filter(
-          item => item.status !== 'completed' && item.status !== 'cancelled'
-        );
-        setQueue(activeItems);
-        updateStats(items);
-      } catch (error) {
-        console.error('Error fetching queue:', error);
+    const fetchInitialData = async () => {
+      const { data: items, error } = await supabase
+        .from('queue_items')
+        .select('*')
+        .order('priority', { ascending: false })
+        .order('created_at', { ascending: true });
+
+      if (error) {
+        console.error('Error fetching initial queue:', error);
+        return;
       }
-    };
 
-    fetchQueue();
-
-    // Set up real-time subscription
-    const subscription = queueService.subscribeToQueue((items) => {
-      const activeItems = items.filter(
+      const activeItems = (items || []).filter(
         item => item.status !== 'completed' && item.status !== 'cancelled'
       );
+      
       setQueue(activeItems);
-      updateStats(items);
-    });
+      updateStats(items || []);
+    };
+
+    fetchInitialData();
 
     return () => {
-      subscription.unsubscribe();
+      channel.unsubscribe();
     };
   }, []);
 
