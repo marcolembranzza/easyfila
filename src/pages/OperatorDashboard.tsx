@@ -1,12 +1,10 @@
 import { useEffect, useState } from "react";
-import { QueueList } from "@/components/QueueList";
-import { StatsCard } from "@/components/StatsCard";
-import { Users, Clock, CheckCircle2, Trash2 } from "lucide-react";
 import { QueueItem, QueueStats } from "@/types";
 import { queueService } from "@/lib/supabase";
 import { useToast } from "@/components/ui/use-toast";
 import { differenceInMinutes } from "date-fns";
 import { Button } from "@/components/ui/button";
+import { Trash2 } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -19,6 +17,8 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { supabase } from "@/integrations/supabase/client";
+import { StatsGrid } from "@/components/stats/StatsGrid";
+import { QueueSection } from "@/components/queue/QueueSection";
 
 const OperatorDashboard = () => {
   const [queue, setQueue] = useState<QueueItem[]>([]);
@@ -53,7 +53,6 @@ const OperatorDashboard = () => {
 
   useEffect(() => {
     fetchQueue();
-    // Update wait times every minute
     const waitTimeInterval = setInterval(fetchQueue, 60000);
     const subscription = queueService.subscribeToQueue((items) => {
       const activeItems = items.filter(
@@ -81,23 +80,22 @@ const OperatorDashboard = () => {
       return item.status === 'completed' && itemDate >= today;
     }).length;
 
-    const waiting = items.filter(item => item.status === 'waiting').length;
+    const waitingItems = items.filter(item => 
+      item.status === 'waiting' || item.status === 'inProgress'
+    );
 
-    const completedItems = items.filter(item => item.status === 'completed');
-    const totalWaitTime = completedItems.reduce((acc, item) => {
-      const startTime = new Date(item.created_at);
-      const endTime = new Date(item.updated_at);
-      return acc + differenceInMinutes(endTime, startTime);
+    const totalWaitTime = waitingItems.reduce((acc, item) => {
+      return acc + calculateWaitTime(item.created_at);
     }, 0);
 
-    const avgWaitTime = completedItems.length > 0 
-      ? Math.round(totalWaitTime / completedItems.length)
+    const avgWaitTime = waitingItems.length > 0 
+      ? Math.round(totalWaitTime / waitingItems.length)
       : 0;
 
     setStats({
       totalServed: completedToday,
       averageWaitTime: avgWaitTime,
-      currentQueueSize: waiting,
+      currentQueueSize: waitingItems.length,
     });
   };
 
@@ -172,32 +170,8 @@ const OperatorDashboard = () => {
         </AlertDialog>
       </div>
       
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <StatsCard
-          title="Tamanho da Fila"
-          value={stats.currentQueueSize}
-          icon={<Users className="text-primary" />}
-        />
-        <StatsCard
-          title="Tempo Médio de Espera"
-          value={`${stats.averageWaitTime} min`}
-          icon={<Clock className="text-primary" />}
-        />
-        <StatsCard
-          title="Total Atendidos Hoje"
-          value={stats.totalServed}
-          icon={<CheckCircle2 className="text-primary" />}
-        />
-      </div>
-
-      <div className="bg-white rounded-lg shadow p-6">
-        <h2 className="text-xl font-semibold mb-4">Fila Atual</h2>
-        <QueueList
-          items={queue}
-          onStatusChange={handleStatusChange}
-          isOperator={true}
-        />
-      </div>
+      <StatsGrid stats={stats} />
+      <QueueSection queue={queue} onStatusChange={handleStatusChange} />
     </div>
   );
 };
