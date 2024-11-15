@@ -16,7 +16,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/lib/supabase";
 import { StatsGrid } from "@/components/stats/StatsGrid";
 import { QueueSection } from "@/components/queue/QueueSection";
 
@@ -34,42 +34,6 @@ const OperatorDashboard = () => {
     const currentTime = new Date();
     return differenceInMinutes(currentTime, startTime);
   };
-
-  const fetchQueue = async () => {
-    try {
-      const items = await queueService.getQueueItems();
-      const activeItems = items.filter(
-        item => item.status !== 'completed' && item.status !== 'cancelled'
-      ).map(item => ({
-        ...item,
-        waitTime: calculateWaitTime(item.created_at)
-      }));
-      setQueue(activeItems);
-      updateStats(items);
-    } catch (error) {
-      console.error('Error fetching queue:', error);
-    }
-  };
-
-  useEffect(() => {
-    fetchQueue();
-    const waitTimeInterval = setInterval(fetchQueue, 60000);
-    const subscription = queueService.subscribeToQueue((items) => {
-      const activeItems = items.filter(
-        item => item.status !== 'completed' && item.status !== 'cancelled'
-      ).map(item => ({
-        ...item,
-        waitTime: calculateWaitTime(item.created_at)
-      }));
-      setQueue(activeItems);
-      updateStats(items);
-    });
-
-    return () => {
-      clearInterval(waitTimeInterval);
-      subscription.unsubscribe();
-    };
-  }, []);
 
   const updateStats = (items: QueueItem[]) => {
     const today = new Date();
@@ -140,6 +104,37 @@ const OperatorDashboard = () => {
       });
     }
   };
+
+  useEffect(() => {
+    // Initial fetch
+    const fetchQueue = async () => {
+      try {
+        const items = await queueService.getQueueItems();
+        const activeItems = items.filter(
+          item => item.status !== 'completed' && item.status !== 'cancelled'
+        );
+        setQueue(activeItems);
+        updateStats(items);
+      } catch (error) {
+        console.error('Error fetching queue:', error);
+      }
+    };
+
+    fetchQueue();
+
+    // Set up real-time subscription
+    const subscription = queueService.subscribeToQueue((items) => {
+      const activeItems = items.filter(
+        item => item.status !== 'completed' && item.status !== 'cancelled'
+      );
+      setQueue(activeItems);
+      updateStats(items);
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
 
   return (
     <div className="container mx-auto py-8">
