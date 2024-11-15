@@ -3,6 +3,7 @@ import { QueueItem } from "@/types";
 import { Clock, User, Star } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { differenceInMinutes } from "date-fns";
+import { playNotificationSound } from "@/utils/sound";
 
 interface QueueCardProps {
   item: QueueItem;
@@ -36,6 +37,9 @@ export const QueueCard = ({ item, onStatusChange, isOperator = false }: QueueCar
 
   const handleStatusChange = async (newStatus: QueueItem['status']) => {
     if (onStatusChange) {
+      if (newStatus === 'inProgress') {
+        playNotificationSound();
+      }
       await onStatusChange(item.id, newStatus);
     }
   };
