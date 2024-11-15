@@ -109,12 +109,19 @@ const OperatorDashboard = () => {
       const { error } = await supabase.rpc('clear_queue_items', {});
       if (error) throw error;
       
+      // Reset stats immediately after clearing the queue
+      setStats({
+        totalServed: 0,
+        averageWaitTime: 0,
+        currentQueueSize: 0,
+      });
+      
+      setQueue([]);
+      
       toast({
         title: "Fila resetada",
         description: "Todas as informações da fila foram apagadas com sucesso.",
       });
-      
-      await fetchQueue();
     } catch (error) {
       toast({
         title: "Erro ao resetar fila",
