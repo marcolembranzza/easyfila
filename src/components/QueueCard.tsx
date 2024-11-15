@@ -3,7 +3,6 @@ import { QueueItem } from "@/types";
 import { Clock, User, Star } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { differenceInMinutes } from "date-fns";
-import { playNotificationSound } from "@/utils/sound";
 import { useToast } from "@/components/ui/use-toast";
 
 interface QueueCardProps {
@@ -40,20 +39,10 @@ export const QueueCard = ({ item, onStatusChange, isOperator = false }: QueueCar
   const handleStatusChange = async (newStatus: QueueItem['status']) => {
     try {
       if (newStatus === 'inProgress') {
-        try {
-          await playNotificationSound();
-          toast({
-            title: "Notificação",
-            description: "Iniciando atendimento",
-          });
-        } catch (error) {
-          console.error('Erro ao reproduzir som:', error);
-          toast({
-            title: "Aviso",
-            description: "Não foi possível reproduzir o som de notificação. Verifique se o seu navegador permite reprodução de áudio.",
-            variant: "destructive",
-          });
-        }
+        toast({
+          title: "Notificação",
+          description: "Iniciando atendimento",
+        });
       }
       
       if (onStatusChange) {
