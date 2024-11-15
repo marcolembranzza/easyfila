@@ -36,11 +36,16 @@ export const QueueCard = ({ item, onStatusChange, isOperator = false }: QueueCar
   };
 
   const handleStatusChange = async (newStatus: QueueItem['status']) => {
-    if (onStatusChange) {
+    try {
       if (newStatus === 'inProgress') {
-        playNotificationSound();
+        console.log('Attempting to play sound...');
+        await playNotificationSound();
       }
-      await onStatusChange(item.id, newStatus);
+      if (onStatusChange) {
+        await onStatusChange(item.id, newStatus);
+      }
+    } catch (error) {
+      console.error('Error in handleStatusChange:', error);
     }
   };
 
