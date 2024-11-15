@@ -3,19 +3,6 @@ import { QueueItem, QueueStats } from "@/types";
 import { queueService } from "@/lib/supabase";
 import { useToast } from "@/components/ui/use-toast";
 import { differenceInMinutes } from "date-fns";
-import { Button } from "@/components/ui/button";
-import { Trash2 } from "lucide-react";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { StatsGrid } from "@/components/stats/StatsGrid";
 import { QueueSection } from "@/components/queue/QueueSection";
@@ -89,32 +76,6 @@ const OperatorDashboard = () => {
     }
   };
 
-  const handleResetQueue = async () => {
-    try {
-      const { error } = await supabase.rpc('clear_queue_items');
-      if (error) throw error;
-      
-      setQueue([]);
-      setStats({
-        totalServed: 0,
-        averageWaitTime: 0,
-        currentQueueSize: 0,
-      });
-      
-      toast({
-        title: "Fila resetada",
-        description: "Todas as informações da fila foram apagadas com sucesso.",
-      });
-    } catch (error) {
-      console.error('Error resetting queue:', error);
-      toast({
-        title: "Erro ao resetar fila",
-        description: "Ocorreu um erro ao tentar resetar a fila.",
-        variant: "destructive",
-      });
-    }
-  };
-
   useEffect(() => {
     const fetchQueue = async () => {
       try {
@@ -161,29 +122,6 @@ const OperatorDashboard = () => {
     <div className="container mx-auto py-8">
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-3xl font-bold">Painel do Operador</h1>
-        <AlertDialog>
-          <AlertDialogTrigger asChild>
-            <Button variant="destructive" className="flex items-center gap-2">
-              <Trash2 className="h-4 w-4" />
-              Resetar Fila
-            </Button>
-          </AlertDialogTrigger>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Você tem certeza?</AlertDialogTitle>
-              <AlertDialogDescription>
-                Esta ação irá apagar todas as informações da fila, incluindo histórico.
-                Esta ação não pode ser desfeita.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>Cancelar</AlertDialogCancel>
-              <AlertDialogAction onClick={handleResetQueue}>
-                Sim, resetar fila
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
       </div>
       
       <StatsGrid stats={stats} />
