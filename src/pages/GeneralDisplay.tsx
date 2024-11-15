@@ -4,6 +4,7 @@ import { QueueItem } from "@/types";
 import { supabase } from "@/integrations/supabase/client";
 import { QRCodeSVG } from "qrcode.react";
 import { Star } from "lucide-react";
+import { queueService } from "@/lib/supabase";
 
 const GeneralDisplay = () => {
   const [currentTicket, setCurrentTicket] = useState<QueueItem | null>(null);
@@ -13,21 +14,12 @@ const GeneralDisplay = () => {
   useEffect(() => {
     const fetchQueue = async () => {
       try {
-        const { data: items, error } = await supabase
-          .from('queue_items')
-          .select('*')
-          .order('priority', { ascending: false })
-          .order('created_at', { ascending: true });
-
-        if (error) {
-          console.error('Error fetching queue:', error);
-          return;
-        }
-
-        const inProgress = items?.find(item => item.status === 'inProgress') as QueueItem;
+        const items = await queueService.getQueueItems();
+        
+        const inProgress = items.find(item => item.status === 'inProgress');
         const waiting = items
-          ?.filter(item => item.status === 'waiting')
-          .slice(0, 5) as QueueItem[];
+          .filter(item => item.status === 'waiting')
+          .slice(0, 5);
         
         setCurrentTicket(inProgress || null);
         setNextTickets(waiting || []);
@@ -43,7 +35,9 @@ const GeneralDisplay = () => {
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'queue_items' },
-        fetchQueue
+        () => {
+          fetchQueue();
+        }
       )
       .subscribe();
 

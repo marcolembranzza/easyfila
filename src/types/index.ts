@@ -6,7 +6,7 @@ export interface QueueItem {
   id: string;
   number: number;
   client_name: string;
-  phone_number: string;
+  phone_number: string | null;
   status: QueueStatus;
   created_at: string;
   updated_at: string;

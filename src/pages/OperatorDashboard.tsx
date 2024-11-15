@@ -107,22 +107,16 @@ const OperatorDashboard = () => {
 
   useEffect(() => {
     const fetchQueue = async () => {
-      const { data: items, error } = await supabase
-        .from('queue_items')
-        .select('*')
-        .order('priority', { ascending: false })
-        .order('created_at', { ascending: true });
-
-      if (error) {
+      try {
+        const items = await queueService.getQueueItems();
+        const activeItems = items.filter(
+          item => item.status !== 'completed' && item.status !== 'cancelled'
+        );
+        setQueue(activeItems);
+        updateStats(items);
+      } catch (error) {
         console.error('Error fetching queue:', error);
-        return;
       }
-
-      const activeItems = (items || [])
-        .filter(item => item.status !== 'completed' && item.status !== 'cancelled') as QueueItem[];
-      
-      setQueue(activeItems);
-      updateStats(items as QueueItem[] || []);
     };
 
     fetchQueue();
@@ -132,7 +126,9 @@ const OperatorDashboard = () => {
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'queue_items' },
-        fetchQueue
+        () => {
+          fetchQueue();
+        }
       )
       .subscribe();
 

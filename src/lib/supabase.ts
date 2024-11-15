@@ -1,5 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
-import { QueueItem } from '@/types';
+import { QueueItem, QueueStatus } from '@/types';
 import { supabase } from '@/integrations/supabase/client';
 
 export const queueService = {
@@ -9,7 +9,7 @@ export const queueService = {
       .insert([{ 
         client_name: clientName, 
         phone_number: phoneNumber || null, 
-        status: 'waiting',
+        status: 'waiting' as QueueStatus,
         priority: priority 
       }])
       .select()
@@ -28,10 +28,13 @@ export const queueService = {
       .order('created_at', { ascending: true });
 
     if (error) throw error;
-    return (data || []) as QueueItem[];
+    return (data || []).map(item => ({
+      ...item,
+      status: item.status as QueueStatus
+    })) as QueueItem[];
   },
 
-  async updateStatus(id: string, status: QueueItem['status']): Promise<void> {
+  async updateStatus(id: string, status: QueueStatus): Promise<void> {
     const { error } = await supabase
       .from('queue_items')
       .update({ status, updated_at: new Date().toISOString() })

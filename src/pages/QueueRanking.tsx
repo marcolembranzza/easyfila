@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { QueueItem } from "@/types";
 import { supabase } from "@/integrations/supabase/client";
+import { queueService } from "@/lib/supabase";
 
 const QueueRanking = () => {
   const navigate = useNavigate();
@@ -15,18 +16,8 @@ const QueueRanking = () => {
   useEffect(() => {
     const fetchQueue = async () => {
       try {
-        const { data: items, error } = await supabase
-          .from('queue_items')
-          .select('*')
-          .order('priority', { ascending: false })
-          .order('created_at', { ascending: true });
-
-        if (error) {
-          console.error('Error fetching queue:', error);
-          return;
-        }
-
-        setQueueItems((items || []).filter(item => item.status === 'waiting') as QueueItem[]);
+        const items = await queueService.getQueueItems();
+        setQueueItems(items.filter(item => item.status === 'waiting'));
       } catch (error) {
         console.error('Error fetching queue:', error);
       } finally {
@@ -41,7 +32,9 @@ const QueueRanking = () => {
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'queue_items' },
-        fetchQueue
+        () => {
+          fetchQueue();
+        }
       )
       .subscribe();
 
