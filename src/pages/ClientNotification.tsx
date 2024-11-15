@@ -5,6 +5,7 @@ import { queueService } from "@/lib/supabase";
 import { QueueItem } from "@/types";
 import { StatusDisplay } from "@/components/queue/StatusDisplay";
 import { QueuePosition } from "@/components/queue/QueuePosition";
+import { supabase } from "@/integrations/supabase/client";
 
 const ClientNotification = () => {
   const { ticketId } = useParams();
@@ -60,13 +61,19 @@ const ClientNotification = () => {
 
     fetchQueuePosition();
     const interval = setInterval(fetchQueuePosition, 5000);
-    const subscription = queueService.subscribeToQueue(async () => {
-      await fetchQueuePosition();
-    });
+
+    const channel = supabase
+      .channel('queue_changes')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'queue_items' },
+        fetchQueuePosition
+      )
+      .subscribe();
 
     return () => {
       clearInterval(interval);
-      subscription.unsubscribe();
+      channel.unsubscribe();
     };
   }, [ticketId, isVibrating, toast]);
 

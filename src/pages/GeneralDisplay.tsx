@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { QueueItem } from "@/types";
-import { queueService } from "@/lib/supabase";
+import { supabase } from "@/integrations/supabase/client";
 import { QRCodeSVG } from "qrcode.react";
 import { Star } from "lucide-react";
 
@@ -13,34 +13,42 @@ const GeneralDisplay = () => {
   useEffect(() => {
     const fetchQueue = async () => {
       try {
-        const items = await queueService.getQueueItems();
-        const inProgress = items.find(item => item.status === 'inProgress');
+        const { data: items, error } = await supabase
+          .from('queue_items')
+          .select('*')
+          .order('priority', { ascending: false })
+          .order('created_at', { ascending: true });
+
+        if (error) {
+          console.error('Error fetching queue:', error);
+          return;
+        }
+
+        const inProgress = items?.find(item => item.status === 'inProgress') as QueueItem;
         const waiting = items
-          .filter(item => item.status === 'waiting')
-          .slice(0, 5);
+          ?.filter(item => item.status === 'waiting')
+          .slice(0, 5) as QueueItem[];
         
         setCurrentTicket(inProgress || null);
-        setNextTickets(waiting);
+        setNextTickets(waiting || []);
       } catch (error) {
         console.error('Error fetching queue:', error);
       }
     };
 
     fetchQueue();
-    const interval = setInterval(fetchQueue, 5000);
-    const subscription = queueService.subscribeToQueue((items) => {
-      const inProgress = items.find(item => item.status === 'inProgress');
-      const waiting = items
-        .filter(item => item.status === 'waiting')
-        .slice(0, 5);
-      
-      setCurrentTicket(inProgress || null);
-      setNextTickets(waiting);
-    });
+    
+    const channel = supabase
+      .channel('queue_changes')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'queue_items' },
+        fetchQueue
+      )
+      .subscribe();
 
     return () => {
-      clearInterval(interval);
-      subscription.unsubscribe();
+      channel.unsubscribe();
     };
   }, []);
 

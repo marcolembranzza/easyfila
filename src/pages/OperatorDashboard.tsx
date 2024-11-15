@@ -106,35 +106,7 @@ const OperatorDashboard = () => {
   };
 
   useEffect(() => {
-    const channel = supabase
-      .channel('queue_changes')
-      .on(
-        'postgres_changes',
-        { event: '*', schema: 'public', table: 'queue_items' },
-        async (payload) => {
-          const { data: items, error } = await supabase
-            .from('queue_items')
-            .select('*')
-            .order('priority', { ascending: false })
-            .order('created_at', { ascending: true });
-
-          if (error) {
-            console.error('Error fetching queue:', error);
-            return;
-          }
-
-          const activeItems = (items || []).filter(
-            item => item.status !== 'completed' && item.status !== 'cancelled'
-          );
-          
-          setQueue(activeItems);
-          updateStats(items || []);
-        }
-      )
-      .subscribe();
-
-    // Initial fetch
-    const fetchInitialData = async () => {
+    const fetchQueue = async () => {
       const { data: items, error } = await supabase
         .from('queue_items')
         .select('*')
@@ -142,19 +114,27 @@ const OperatorDashboard = () => {
         .order('created_at', { ascending: true });
 
       if (error) {
-        console.error('Error fetching initial queue:', error);
+        console.error('Error fetching queue:', error);
         return;
       }
 
-      const activeItems = (items || []).filter(
-        item => item.status !== 'completed' && item.status !== 'cancelled'
-      );
+      const activeItems = (items || [])
+        .filter(item => item.status !== 'completed' && item.status !== 'cancelled') as QueueItem[];
       
       setQueue(activeItems);
-      updateStats(items || []);
+      updateStats(items as QueueItem[] || []);
     };
 
-    fetchInitialData();
+    fetchQueue();
+    
+    const channel = supabase
+      .channel('queue_changes')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'queue_items' },
+        fetchQueue
+      )
+      .subscribe();
 
     return () => {
       channel.unsubscribe();
