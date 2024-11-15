@@ -19,12 +19,11 @@ const OperatorDashboard = () => {
     const fetchQueue = async () => {
       try {
         const items = await queueService.getQueueItems();
-        // Filter out completed and cancelled tickets
         const activeItems = items.filter(
           item => item.status !== 'completed' && item.status !== 'cancelled'
         );
         setQueue(activeItems);
-        updateStats(items); // Keep all items for stats calculation
+        updateStats(items);
       } catch (error) {
         console.error('Error fetching queue:', error);
       }
@@ -32,13 +31,13 @@ const OperatorDashboard = () => {
 
     fetchQueue();
 
+    // Subscribe to real-time updates
     const subscription = queueService.subscribeToQueue((items) => {
-      // Filter out completed and cancelled tickets
       const activeItems = items.filter(
         item => item.status !== 'completed' && item.status !== 'cancelled'
       );
       setQueue(activeItems);
-      updateStats(items); // Keep all items for stats calculation
+      updateStats(items);
     });
 
     return () => {

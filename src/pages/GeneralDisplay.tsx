@@ -28,6 +28,7 @@ const GeneralDisplay = () => {
 
     fetchQueue();
 
+    // Subscribe to real-time updates
     const subscription = queueService.subscribeToQueue((items) => {
       const inProgress = items.find(item => item.status === 'inProgress');
       const waiting = items
