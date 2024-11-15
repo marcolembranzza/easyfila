@@ -5,6 +5,7 @@ import { Users, Clock, CheckCircle2 } from "lucide-react";
 import { QueueItem, QueueStats } from "@/types";
 import { queueService } from "@/lib/supabase";
 import { useToast } from "@/components/ui/use-toast";
+import { differenceInMinutes } from "date-fns";
 
 const OperatorDashboard = () => {
   const [queue, setQueue] = useState<QueueItem[]>([]);
@@ -31,7 +32,6 @@ const OperatorDashboard = () => {
 
     fetchQueue();
 
-    // Subscribe to real-time updates
     const subscription = queueService.subscribeToQueue((items) => {
       const activeItems = items.filter(
         item => item.status !== 'completed' && item.status !== 'cancelled'
@@ -55,7 +55,18 @@ const OperatorDashboard = () => {
     }).length;
 
     const waiting = items.filter(item => item.status === 'waiting').length;
-    const avgWaitTime = Math.round(items.reduce((acc, item) => acc + (item.estimated_time || 0), 0) / items.length) || 0;
+
+    // Calculate average wait time for completed items
+    const completedItems = items.filter(item => item.status === 'completed');
+    const totalWaitTime = completedItems.reduce((acc, item) => {
+      const startTime = new Date(item.created_at);
+      const endTime = new Date(item.updated_at);
+      return acc + differenceInMinutes(endTime, startTime);
+    }, 0);
+
+    const avgWaitTime = completedItems.length > 0 
+      ? Math.round(totalWaitTime / completedItems.length)
+      : 0;
 
     setStats({
       totalServed: completedToday,
