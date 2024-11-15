@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { QueueItem } from "@/types";
 import { Clock, User, Star } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import { differenceInMinutes } from "date-fns";
 
 interface QueueCardProps {
   item: QueueItem;
@@ -39,6 +40,12 @@ export const QueueCard = ({ item, onStatusChange, isOperator = false }: QueueCar
     }
   };
 
+  const getWaitTime = () => {
+    const startTime = new Date(item.created_at);
+    const currentTime = new Date();
+    return differenceInMinutes(currentTime, startTime);
+  };
+
   return (
     <div className="bg-white border rounded-lg p-4 shadow-sm flex items-center justify-between">
       <div className="flex items-center space-x-4 w-full">
@@ -67,7 +74,7 @@ export const QueueCard = ({ item, onStatusChange, isOperator = false }: QueueCar
         
         <div className="flex items-center space-x-2">
           <Clock className="h-5 w-5 text-gray-500" />
-          <span>{item.estimated_time || 15} min</span>
+          <span>{getWaitTime()} min</span>
           
           <span 
             className={`px-2 py-1 rounded text-xs font-semibold ${getStatusColor()}`}

@@ -29,12 +29,21 @@ const OperatorDashboard = () => {
   });
   const { toast } = useToast();
 
+  const calculateWaitTime = (createdAt: string) => {
+    const startTime = new Date(createdAt);
+    const currentTime = new Date();
+    return differenceInMinutes(currentTime, startTime);
+  };
+
   const fetchQueue = async () => {
     try {
       const items = await queueService.getQueueItems();
       const activeItems = items.filter(
         item => item.status !== 'completed' && item.status !== 'cancelled'
-      );
+      ).map(item => ({
+        ...item,
+        waitTime: calculateWaitTime(item.created_at)
+      }));
       setQueue(activeItems);
       updateStats(items);
     } catch (error) {
@@ -44,17 +53,21 @@ const OperatorDashboard = () => {
 
   useEffect(() => {
     fetchQueue();
-    const interval = setInterval(fetchQueue, 5000);
+    // Update wait times every minute
+    const waitTimeInterval = setInterval(fetchQueue, 60000);
     const subscription = queueService.subscribeToQueue((items) => {
       const activeItems = items.filter(
         item => item.status !== 'completed' && item.status !== 'cancelled'
-      );
+      ).map(item => ({
+        ...item,
+        waitTime: calculateWaitTime(item.created_at)
+      }));
       setQueue(activeItems);
       updateStats(items);
     });
 
     return () => {
-      clearInterval(interval);
+      clearInterval(waitTimeInterval);
       subscription.unsubscribe();
     };
   }, []);
