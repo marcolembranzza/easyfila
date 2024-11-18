@@ -5,7 +5,7 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Ticket } from "lucide-react";
+import { Ticket, LayoutDashboard } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { queueService } from "@/lib/supabase";
 
@@ -92,6 +92,15 @@ const TicketRetrieval = () => {
               disabled={isLoading}
             >
               {isLoading ? "Aguarde..." : "Retirar Senha"}
+            </Button>
+            <Button
+              className="w-full"
+              size="lg"
+              variant="secondary"
+              onClick={() => navigate('/display')}
+            >
+              <LayoutDashboard className="mr-2 h-4 w-4" />
+              Acessar Painel Geral
             </Button>
           </CardContent>
         </Card>
