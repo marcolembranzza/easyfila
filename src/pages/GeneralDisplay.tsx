@@ -9,7 +9,7 @@ import { queueService } from "@/lib/supabase";
 const GeneralDisplay = () => {
   const [currentTicket, setCurrentTicket] = useState<QueueItem | null>(null);
   const [nextTickets, setNextTickets] = useState<QueueItem[]>([]);
-  const systemUrl = `${window.location.origin}/client`;
+  const systemUrl = `${window.location.origin}/ticket`;
 
   useEffect(() => {
     const fetchQueue = async () => {
@@ -52,7 +52,6 @@ const GeneralDisplay = () => {
         <h1 className="text-4xl font-bold text-center mb-8">Painel Geral</h1>
         
         <div className="grid grid-cols-1 lg:grid-cols-[1fr,400px] gap-8">
-          {/* Coluna principal com as senhas */}
           <div className="space-y-8">
             {/* Senha em Atendimento */}
             <Card className="bg-primary text-white">
