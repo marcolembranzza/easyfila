@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
 import Header from "./components/Header";
 import FloatingNav from "./components/FloatingNav";
@@ -28,12 +28,14 @@ const App = () => (
             <main className="flex-1">
               <Routes>
                 <Route path="/" element={<Index />} />
-                <Route path="/ranking" element={<QueueRanking />} />
-                <Route path="/ticket" element={<TicketRetrieval />} />
-                <Route path="/notification/:ticketId" element={<ClientNotification />} />
-                <Route path="/operator" element={<OperatorDashboard />} />
-                <Route path="/display" element={<GeneralDisplay />} />
                 <Route path="/client" element={<ClientView />} />
+                <Route path="/ticket" element={<TicketRetrieval />} />
+                <Route path="/display" element={<GeneralDisplay />} />
+                <Route path="/notification/:ticketId" element={<ClientNotification />} />
+                
+                {/* Restricted Routes */}
+                <Route path="/ranking" element={<Navigate to="/client" replace />} />
+                <Route path="/operator" element={<Navigate to="/client" replace />} />
               </Routes>
             </main>
             <FloatingNav />

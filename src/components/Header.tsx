@@ -21,6 +21,9 @@ const Header = () => {
     navigate('/');
   };
 
+  const isClientArea = ['/ticket', '/display'].includes(location.pathname);
+  const isAdminArea = location.pathname === '/admin';
+
   return (
     <header className="border-b">
       <div className="flex h-16 items-center px-4 container mx-auto">
@@ -29,7 +32,13 @@ const Header = () => {
         </Link>
         
         <div className="ml-auto flex items-center space-x-4">
-          {location.pathname !== '/admin' && (
+          {!isClientArea && (
+            <Button variant="outline" onClick={() => navigate('/client')}>
+              Área do Cliente
+            </Button>
+          )}
+          
+          {!isAdminArea && (
             <Button variant="outline" onClick={() => navigate('/admin')}>
               Área Administrativa
             </Button>
