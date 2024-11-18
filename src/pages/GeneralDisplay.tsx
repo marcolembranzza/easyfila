@@ -10,7 +10,7 @@ import { useNavigate } from "react-router-dom";
 
 const GeneralDisplay = () => {
   const navigate = useNavigate();
-  const [currentTicket, setCurrentTicket] = useState<QueueItem | null>(null);
+  const [currentTickets, setCurrentTickets] = useState<QueueItem[]>([]);
   const [nextTickets, setNextTickets] = useState<QueueItem[]>([]);
   const systemUrl = `${window.location.origin}/ticket`;
 
@@ -19,13 +19,13 @@ const GeneralDisplay = () => {
       try {
         const items = await queueService.getQueueItems();
         
-        const inProgress = items.find(item => item.status === 'inProgress');
+        const inProgress = items.filter(item => item.status === 'inProgress');
         const waiting = items
           .filter(item => item.status === 'waiting')
           .slice(0, 5);
         
-        setCurrentTicket(inProgress || null);
-        setNextTickets(waiting || []);
+        setCurrentTickets(inProgress);
+        setNextTickets(waiting);
       } catch (error) {
         console.error('Error fetching queue:', error);
       }
@@ -56,30 +56,36 @@ const GeneralDisplay = () => {
         
         <div className="grid grid-cols-1 lg:grid-cols-[1fr,400px] gap-8">
           <div className="space-y-8">
-            {/* Senha em Atendimento */}
+            {/* Senhas em Atendimento */}
             <Card className="bg-primary text-white">
               <CardContent className="p-8">
                 <h2 className="text-2xl font-semibold text-center mb-4">Em Atendimento</h2>
-                {currentTicket ? (
-                  <div className="text-center">
-                    <div className="text-7xl font-bold mb-4">
-                      {currentTicket.number}
-                    </div>
-                    <div className="text-3xl flex justify-center items-center space-x-2">
-                      <span>{currentTicket.client_name}</span>
-                      {currentTicket.priority && (
-                        <div className="flex items-center space-x-1 bg-white/20 text-white px-2 py-0.5 rounded text-sm">
-                          <Star className="h-4 w-4" />
-                          <span>Preferencial</span>
+                <div className="space-y-4">
+                  {currentTickets.length > 0 ? (
+                    currentTickets.map((ticket) => (
+                      <div key={ticket.id} className="bg-white/10 rounded-lg p-4">
+                        <div className="text-center">
+                          <div className="text-5xl font-bold mb-2">
+                            {ticket.number}
+                          </div>
+                          <div className="text-2xl flex justify-center items-center space-x-2">
+                            <span>{ticket.client_name}</span>
+                            {ticket.priority && (
+                              <div className="flex items-center space-x-1 bg-white/20 text-white px-2 py-0.5 rounded text-sm">
+                                <Star className="h-4 w-4" />
+                                <span>Preferencial</span>
+                              </div>
+                            )}
+                          </div>
                         </div>
-                      )}
+                      </div>
+                    ))
+                  ) : (
+                    <div className="text-center text-2xl">
+                      Nenhuma senha em atendimento
                     </div>
-                  </div>
-                ) : (
-                  <div className="text-center text-2xl">
-                    Nenhuma senha em atendimento
-                  </div>
-                )}
+                  )}
+                </div>
               </CardContent>
             </Card>
 
