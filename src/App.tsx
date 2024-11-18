@@ -13,8 +13,20 @@ import ClientNotification from "./pages/ClientNotification";
 import OperatorDashboard from "./pages/OperatorDashboard";
 import GeneralDisplay from "./pages/GeneralDisplay";
 import ClientView from "./pages/ClientView";
+import AdminLogin from "./pages/AdminLogin";
+import { useAuth } from "./contexts/AuthContext";
 
 const queryClient = new QueryClient();
+
+const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
+  const { isAuthenticated } = useAuth();
+  
+  if (!isAuthenticated) {
+    return <Navigate to="/admin/login" replace />;
+  }
+
+  return <>{children}</>;
+};
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -32,10 +44,19 @@ const App = () => (
                 <Route path="/ticket" element={<TicketRetrieval />} />
                 <Route path="/display" element={<GeneralDisplay />} />
                 <Route path="/notification/:ticketId" element={<ClientNotification />} />
+                <Route path="/admin/login" element={<AdminLogin />} />
                 
-                {/* Restricted Routes */}
-                <Route path="/ranking" element={<Navigate to="/client" replace />} />
-                <Route path="/operator" element={<Navigate to="/client" replace />} />
+                {/* Protected Admin Routes */}
+                <Route path="/ranking" element={
+                  <ProtectedRoute>
+                    <QueueRanking />
+                  </ProtectedRoute>
+                } />
+                <Route path="/operator" element={
+                  <ProtectedRoute>
+                    <OperatorDashboard />
+                  </ProtectedRoute>
+                } />
               </Routes>
             </main>
             <FloatingNav />
