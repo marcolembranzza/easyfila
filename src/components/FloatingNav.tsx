@@ -2,6 +2,7 @@ import { Menu } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "./ui/button";
+import { useAuth } from "@/contexts/AuthContext";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,6 +13,9 @@ import {
 const FloatingNav = () => {
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
+  const { isAuthenticated } = useAuth();
+
+  if (!isAuthenticated) return null;
 
   return (
     <div className="fixed bottom-4 right-4 z-50">
