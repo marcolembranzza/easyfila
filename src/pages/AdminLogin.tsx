@@ -8,7 +8,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Lock } from "lucide-react";
 
 const AdminLogin = () => {
-  const [email, setEmail] = useState("admin@admin.com");
+  const [email, setEmail] = useState("marcopontoacf@hotmail.com");
   const [password, setPassword] = useState("admin");
   const [isLoading, setIsLoading] = useState(false);
   const { login } = useAuth();
