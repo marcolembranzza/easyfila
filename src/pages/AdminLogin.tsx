@@ -8,8 +8,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Lock } from "lucide-react";
 
 const AdminLogin = () => {
-  const [email, setEmail] = useState("marcopontoacf@hotmail.com");
-  const [password, setPassword] = useState("admin");
+  const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
@@ -19,7 +18,7 @@ const AdminLogin = () => {
     setIsLoading(true);
 
     try {
-      await login(email, password);
+      await login("admin@admin.com", password);
       navigate("/operator");
     } catch (error) {
       console.error("Login error:", error);
@@ -41,24 +40,13 @@ const AdminLogin = () => {
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="Digite seu email"
-                  required
-                />
-              </div>
-              <div className="space-y-2">
                 <Label htmlFor="password">Senha</Label>
                 <Input
                   id="password"
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Digite sua senha"
+                  placeholder="Digite a senha"
                   required
                 />
               </div>
