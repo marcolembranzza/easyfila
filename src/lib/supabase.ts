@@ -23,24 +23,25 @@ export const queueService = {
       throw error;
     }
 
-    return insertedData;
+    return insertedData as QueueItem;
   },
 
-  async getTickets(): Promise<QueueItem[]> {
+  async getQueueItems(): Promise<QueueItem[]> {
     const { data, error } = await supabase
       .from('queue_items')
       .select('*')
-      .eq('status', 'waiting');
+      .order('priority', { ascending: false })
+      .order('created_at', { ascending: true });
 
     if (error) {
       console.error('Error fetching tickets:', error);
       throw error;
     }
 
-    return data || [];
+    return (data || []) as QueueItem[];
   },
 
-  async updateTicketStatus(id: string, status: QueueStatus): Promise<void> {
+  async updateStatus(id: string, status: QueueStatus): Promise<void> {
     const { error } = await supabase
       .from('queue_items')
       .update({ status })
