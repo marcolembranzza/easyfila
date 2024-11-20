@@ -2,16 +2,14 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
 import { queueService } from "@/lib/supabase";
-import { Ticket, User, Star } from "lucide-react";
+import { Ticket, Star } from "lucide-react";
 
 const TicketRetrieval = () => {
   const navigate = useNavigate();
-  const [name, setName] = useState("");
   const [priority, setPriority] = useState("normal");
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
@@ -20,7 +18,7 @@ const TicketRetrieval = () => {
     try {
       setIsLoading(true);
       const ticket = await queueService.createTicket(
-        name,
+        null,
         "",
         priority === "priority"
       );
@@ -54,20 +52,6 @@ const TicketRetrieval = () => {
           <CardTitle className="text-2xl font-bold">Retirar Senha</CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
-          <div className="space-y-2">
-            <Label htmlFor="name" className="flex items-center gap-2">
-              <User className="w-4 h-4" />
-              Nome (opcional)
-            </Label>
-            <Input
-              id="name"
-              placeholder="Digite seu nome"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className="w-full"
-            />
-          </div>
-
           <div className="space-y-3">
             <Label className="flex items-center gap-2">
               <Star className="w-4 h-4" />
