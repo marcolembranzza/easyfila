@@ -16,11 +16,22 @@ export const StatusDisplay = ({ currentTicket, isVibrating }: StatusDisplayProps
     return "Aguardando...";
   };
 
+  const getBellColor = () => {
+    if (!currentTicket) return "text-primary";
+    if (currentTicket.status === 'inProgress') return "text-red-500";
+    if (currentTicket.status === 'waiting' && currentTicket.number === 1) {
+      return isVibrating ? "text-orange-500" : "text-yellow-500";
+    }
+    return "text-primary";
+  };
+
   return (
     <Card>
       <CardHeader className="text-center">
         <div className="mx-auto mb-4 p-3 bg-primary/10 rounded-full w-fit">
-          <BellRing className={`w-8 h-8 text-primary ${isVibrating ? 'animate-pulse' : ''}`} />
+          <BellRing 
+            className={`w-8 h-8 ${getBellColor()} ${isVibrating ? 'animate-pulse' : ''}`} 
+          />
         </div>
         <CardTitle className="text-2xl">Status da Fila</CardTitle>
       </CardHeader>
