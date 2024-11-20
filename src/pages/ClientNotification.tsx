@@ -14,6 +14,18 @@ const ClientNotification = () => {
   const [isVibrating, setIsVibrating] = useState(false);
   const [currentTicket, setCurrentTicket] = useState<QueueItem | null>(null);
 
+  const handleVibration = (position: number) => {
+    if (position === 1 && 'vibrate' in navigator) {
+      // Vibrate for 200ms, pause for 100ms, vibrate for 200ms
+      navigator.vibrate([200, 100, 200]);
+      
+      toast({
+        title: "Atenção!",
+        description: "Você é o próximo da fila!",
+      });
+    }
+  };
+
   useEffect(() => {
     const fetchQueuePosition = async () => {
       try {
@@ -36,15 +48,11 @@ const ClientNotification = () => {
           const position = waitingItems.findIndex(item => item.id === ticketId) + 1;
           setQueuePosition(position);
           
+          // Trigger vibration if client is first in queue
+          handleVibration(position);
+          
           if (position <= 2 && !isVibrating) {
             setIsVibrating(true);
-            if (navigator.vibrate) {
-              navigator.vibrate([200, 100, 200]);
-              toast({
-                title: "Atenção!",
-                description: "Sua vez está próxima!",
-              });
-            }
           }
         } else if (myTicket.status === 'inProgress') {
           setQueuePosition(0);
@@ -59,20 +67,30 @@ const ClientNotification = () => {
       }
     };
 
+    // Initial data fetch
     fetchQueuePosition();
-    const interval = setInterval(fetchQueuePosition, 5000);
-
+    
+    // Subscribe to real-time updates
     const channel = supabase
       .channel('queue_changes')
       .on(
         'postgres_changes',
-        { event: '*', schema: 'public', table: 'queue_items' },
-        fetchQueuePosition
+        { 
+          event: '*', 
+          schema: 'public', 
+          table: 'queue_items'
+        },
+        async (payload) => {
+          console.log('Realtime update received:', payload);
+          // Immediately fetch fresh data after any change
+          await fetchQueuePosition();
+        }
       )
-      .subscribe();
+      .subscribe((status) => {
+        console.log('Subscription status:', status);
+      });
 
     return () => {
-      clearInterval(interval);
       channel.unsubscribe();
     };
   }, [ticketId, isVibrating, toast]);
