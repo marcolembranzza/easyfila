@@ -18,8 +18,9 @@ const TicketRetrieval = () => {
   const handleGetTicket = async () => {
     try {
       setIsLoading(true);
+      const trimmedName = name.trim();
       const ticket = await queueService.createTicket(
-        name.trim() || null,
+        trimmedName === "" ? null : trimmedName,
         "",
         priority === "priority"
       );
