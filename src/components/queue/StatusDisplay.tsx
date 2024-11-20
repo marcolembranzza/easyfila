@@ -19,8 +19,11 @@ export const StatusDisplay = ({ currentTicket, isVibrating }: StatusDisplayProps
   const getBellColor = () => {
     if (!currentTicket) return "text-primary";
     if (currentTicket.status === 'inProgress') return "text-red-500";
-    if (currentTicket.status === 'waiting' && currentTicket.number === 1) {
-      return isVibrating ? "text-orange-500" : "text-yellow-500";
+    if (currentTicket.status === 'waiting') {
+      const queuePosition = currentTicket.number;
+      if (queuePosition === 1) {
+        return isVibrating ? "text-orange-500" : "text-yellow-500";
+      }
     }
     return "text-primary";
   };
