@@ -1,4 +1,3 @@
-import { createClient } from '@supabase/supabase-js';
 import { QueueItem, QueueStatus } from '@/types';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -7,7 +6,7 @@ export const queueService = {
     const { data: insertedData, error } = await supabase
       .from('queue_items')
       .insert([{ 
-        client_name: clientName, 
+        client_name: clientName || null, 
         phone_number: phoneNumber || null, 
         status: 'waiting' as QueueStatus,
         priority: priority 
