@@ -4,7 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 
 export const queueService = {
   async createTicket(clientName: string, phoneNumber: string = '', priority: boolean = false): Promise<QueueItem> {
-    const { data, error } = await supabase
+    const { data: insertedData, error } = await supabase
       .from('queue_items')
       .insert([{ 
         client_name: clientName, 
@@ -16,8 +16,28 @@ export const queueService = {
       .single();
 
     if (error) throw error;
-    if (!data) throw new Error('No data returned from insert');
-    return data as QueueItem;
+    if (!insertedData) throw new Error('No data returned from insert');
+
+    // Update the client name with the ticket number if it's empty
+    if (!clientName) {
+      const { error: updateError } = await supabase
+        .from('queue_items')
+        .update({ client_name: `Cliente ${insertedData.number}` })
+        .eq('id', insertedData.id);
+
+      if (updateError) throw updateError;
+
+      return {
+        ...insertedData,
+        client_name: `Cliente ${insertedData.number}`,
+        status: insertedData.status as QueueStatus
+      };
+    }
+
+    return {
+      ...insertedData,
+      status: insertedData.status as QueueStatus
+    };
   },
 
   async getQueueItems(): Promise<QueueItem[]> {

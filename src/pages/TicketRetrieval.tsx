@@ -17,20 +17,12 @@ const TicketRetrieval = () => {
   const { toast } = useToast();
 
   const handleGetTicket = async () => {
-    if (!name.trim()) {
-      toast({
-        title: "Nome obrigatório",
-        description: "Por favor, insira seu nome para retirar uma senha.",
-        variant: "destructive",
-      });
-      return;
-    }
-
     try {
       setIsLoading(true);
-      const ticket = await queueService.createTicket(name, "", priority === "priority");
+      const ticket = await queueService.createTicket(name.trim() || "", "", priority === "priority");
       
       if (ticket) {
+        const displayName = name.trim() || `Cliente ${ticket.number}`;
         toast({
           title: "Senha retirada com sucesso!",
           description: `Sua senha é ${ticket.number}`,
@@ -60,7 +52,7 @@ const TicketRetrieval = () => {
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="space-y-2">
-              <Label htmlFor="name">Nome</Label>
+              <Label htmlFor="name">Nome (opcional)</Label>
               <Input
                 id="name"
                 placeholder="Digite seu nome"
