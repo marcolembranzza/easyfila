@@ -15,13 +15,24 @@ const ClientNotification = () => {
   const [currentTicket, setCurrentTicket] = useState<QueueItem | null>(null);
 
   const handleVibration = (position: number) => {
-    if ((position === 1 || position === 0) && 'vibrate' in navigator) {
-      navigator.vibrate([200, 100, 200]);
-      
-      toast({
-        title: "Atenção!",
-        description: "Sua vez está chegando!",
-      });
+    try {
+      if ((position <= 1) && 'vibrate' in navigator) {
+        // Try to vibrate multiple times to ensure it works on Android
+        const vibrationPattern = [200, 100, 200, 100, 200];
+        navigator.vibrate(vibrationPattern);
+        
+        // Fallback for Android: retry vibration after a short delay
+        setTimeout(() => {
+          navigator.vibrate(vibrationPattern);
+        }, 500);
+
+        toast({
+          title: "Atenção!",
+          description: position === 0 ? "É sua vez!" : "Sua vez está chegando!",
+        });
+      }
+    } catch (error) {
+      console.error('Vibration error:', error);
     }
   };
 
@@ -46,18 +57,16 @@ const ClientNotification = () => {
       if (myTicket.status === 'waiting') {
         const position = waitingItems.findIndex(item => item.id === ticketId) + 1;
         setQueuePosition(position);
-        handleVibration(position);
         
-        if (position <= 2 && !isVibrating) {
+        if (position <= 2) {
           setIsVibrating(true);
+          handleVibration(position);
         }
       } else if (myTicket.status === 'inProgress') {
-        // When client is being served, keep them visible with position 0
         setQueuePosition(0);
         setIsVibrating(true);
         handleVibration(0);
       } else if (myTicket.status === 'completed' || myTicket.status === 'cancelled') {
-        // For completed or cancelled tickets
         setQueuePosition(null);
         setIsVibrating(false);
       }
@@ -89,6 +98,7 @@ const ClientNotification = () => {
       )
       .subscribe();
 
+    // Cleanup subscription on component unmount
     return () => {
       channel.unsubscribe();
     };
