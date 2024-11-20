@@ -18,10 +18,13 @@ const TicketRetrieval = () => {
   const handleGetTicket = async () => {
     try {
       setIsLoading(true);
-      const ticket = await queueService.createTicket(name.trim(), "", priority === "priority");
+      const ticket = await queueService.createTicket(
+        name.trim() || null,
+        "",
+        priority === "priority"
+      );
       
       if (ticket) {
-        const displayName = name.trim() || `Cliente ${ticket.number}`;
         toast({
           title: "Senha retirada com sucesso!",
           description: `Sua senha é ${ticket.number}`,
