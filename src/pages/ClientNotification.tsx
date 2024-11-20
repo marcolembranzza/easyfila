@@ -17,15 +17,24 @@ const ClientNotification = () => {
   const handleVibration = (position: number) => {
     try {
       if ((position <= 1) && 'vibrate' in navigator) {
-        // Try to vibrate multiple times to ensure it works on Android
-        const vibrationPattern = [200, 100, 200, 100, 200];
+        // Longer vibration pattern for better Android compatibility
+        const vibrationPattern = [300, 150, 300, 150, 300];
         navigator.vibrate(vibrationPattern);
         
-        // Fallback for Android: retry vibration after a short delay
-        setTimeout(() => {
-          navigator.vibrate(vibrationPattern);
-        }, 500);
+        // Multiple vibration attempts for Android
+        const retryCount = 3;
+        let attempt = 0;
+        
+        const retryVibration = setInterval(() => {
+          if (attempt < retryCount) {
+            navigator.vibrate(vibrationPattern);
+            attempt++;
+          } else {
+            clearInterval(retryVibration);
+          }
+        }, 1000);
 
+        // Show appropriate toast message
         toast({
           title: "Atenção!",
           description: position === 0 ? "É sua vez!" : "Sua vez está chegando!",
@@ -51,6 +60,7 @@ const ClientNotification = () => {
         return;
       }
 
+      // Always update the current ticket state
       setCurrentTicket(myTicket);
       
       // Handle different ticket statuses
@@ -63,6 +73,7 @@ const ClientNotification = () => {
           handleVibration(position);
         }
       } else if (myTicket.status === 'inProgress') {
+        // Ensure visibility during service
         setQueuePosition(0);
         setIsVibrating(true);
         handleVibration(0);
@@ -98,7 +109,7 @@ const ClientNotification = () => {
       )
       .subscribe();
 
-    // Cleanup subscription on component unmount
+    // Cleanup subscription and intervals on component unmount
     return () => {
       channel.unsubscribe();
     };
