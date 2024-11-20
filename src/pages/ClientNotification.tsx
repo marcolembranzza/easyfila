@@ -16,7 +16,6 @@ const ClientNotification = () => {
 
   const handleVibration = (position: number) => {
     if (position === 1 && 'vibrate' in navigator) {
-      // Vibrate for 200ms, pause for 100ms, vibrate for 200ms
       navigator.vibrate([200, 100, 200]);
       
       toast({
@@ -44,18 +43,23 @@ const ClientNotification = () => {
 
         setCurrentTicket(myTicket);
         
+        // Handle different ticket statuses
         if (myTicket.status === 'waiting') {
           const position = waitingItems.findIndex(item => item.id === ticketId) + 1;
           setQueuePosition(position);
-          
-          // Trigger vibration if client is first in queue
           handleVibration(position);
           
           if (position <= 2 && !isVibrating) {
             setIsVibrating(true);
           }
         } else if (myTicket.status === 'inProgress') {
+          // When the client is being served, set position to 0 and keep vibrating
           setQueuePosition(0);
+          setIsVibrating(true);
+        } else {
+          // For completed or cancelled tickets
+          setQueuePosition(null);
+          setIsVibrating(false);
         }
       } catch (error) {
         console.error('Error fetching queue position:', error);
@@ -82,7 +86,6 @@ const ClientNotification = () => {
         },
         async (payload) => {
           console.log('Realtime update received:', payload);
-          // Immediately fetch fresh data after any change
           await fetchQueuePosition();
         }
       )
