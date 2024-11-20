@@ -5,11 +5,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { QRCodeSVG } from "qrcode.react";
 import { Star } from "lucide-react";
 import { queueService } from "@/lib/supabase";
-import { Button } from "@/components/ui/button";
-import { useNavigate } from "react-router-dom";
 
 const GeneralDisplay = () => {
-  const navigate = useNavigate();
   const [currentTickets, setCurrentTickets] = useState<QueueItem[]>([]);
   const [nextTickets, setNextTickets] = useState<QueueItem[]>([]);
   const systemUrl = `${window.location.origin}/ticket`;
@@ -133,13 +130,6 @@ const GeneralDisplay = () => {
             <Card>
               <CardContent className="p-8 flex flex-col items-center">
                 <h2 className="text-2xl font-semibold text-center mb-6">Retire e acompanhe sua senha pelo celular</h2>
-                <Button 
-                  size="lg"
-                  className="mb-6 w-full"
-                  onClick={() => navigate('/ticket')}
-                >
-                  Retirar Nova Senha
-                </Button>
                 <div className="bg-white p-4 rounded-lg shadow-sm">
                   <QRCodeSVG value={systemUrl} size={200} />
                 </div>
