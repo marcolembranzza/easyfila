@@ -18,13 +18,25 @@ export const StatusDisplay = ({ currentTicket, isVibrating }: StatusDisplayProps
 
   const getBellColor = () => {
     if (!currentTicket) return "text-primary";
+    
+    // When it's the client's turn (status is inProgress)
     if (currentTicket.status === 'inProgress') return "text-red-500";
+    
     if (currentTicket.status === 'waiting') {
       const queuePosition = currentTicket.number;
-      if (queuePosition === 1 || queuePosition === 2) {
-        return isVibrating ? "text-orange-500" : "text-yellow-500";
+      
+      // Yellow when vibrating and client is second in queue
+      if (queuePosition === 2 && isVibrating) {
+        return "text-yellow-500";
+      }
+      
+      // Orange when not vibrating and client is first in queue
+      if (queuePosition === 1 && !isVibrating) {
+        return "text-orange-500";
       }
     }
+    
+    // Default primary color for all other cases
     return "text-primary";
   };
 
