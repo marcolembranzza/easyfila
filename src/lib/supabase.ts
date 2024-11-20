@@ -1,48 +1,66 @@
-import { QueueItem, QueueStatus } from '@/types';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase } from "@/integrations/supabase/client";
+import { QueueItem, QueueStatus } from "@/types";
 
 export const queueService = {
-  async createTicket(clientName: string, phoneNumber: string = '', priority: boolean = false): Promise<QueueItem> {
+  async createTicket(
+    clientName: string | null,
+    phoneNumber: string | null,
+    priority: boolean
+  ): Promise<QueueItem | null> {
     const { data: insertedData, error } = await supabase
       .from('queue_items')
       .insert([{ 
         client_name: clientName ? clientName.trim() : null, 
         phone_number: phoneNumber || null, 
         status: 'waiting' as QueueStatus,
-        priority: priority 
+        priority: priority
       }])
       .select()
       .single();
 
-    if (error) throw error;
-    if (!insertedData) throw new Error('No data returned from insert');
+    if (error) {
+      console.error('Error creating ticket:', error);
+      throw error;
+    }
 
-    return {
-      ...insertedData,
-      status: insertedData.status as QueueStatus
-    };
+    return insertedData;
   },
 
-  async getQueueItems(): Promise<QueueItem[]> {
+  async getTickets(): Promise<QueueItem[]> {
     const { data, error } = await supabase
       .from('queue_items')
       .select('*')
-      .order('priority', { ascending: false })
-      .order('created_at', { ascending: true });
+      .eq('status', 'waiting');
 
-    if (error) throw error;
-    return (data || []).map(item => ({
-      ...item,
-      status: item.status as QueueStatus
-    })) as QueueItem[];
+    if (error) {
+      console.error('Error fetching tickets:', error);
+      throw error;
+    }
+
+    return data || [];
   },
 
-  async updateStatus(id: string, status: QueueStatus): Promise<void> {
+  async updateTicketStatus(id: string, status: QueueStatus): Promise<void> {
     const { error } = await supabase
       .from('queue_items')
-      .update({ status, updated_at: new Date().toISOString() })
+      .update({ status })
       .eq('id', id);
+    
+    if (error) {
+      console.error('Error updating ticket status:', error);
+      throw error;
+    }
+  },
 
-    if (error) throw error;
-  }
+  async deleteTicket(id: string): Promise<void> {
+    const { error } = await supabase
+      .from('queue_items')
+      .delete()
+      .eq('id', id);
+    
+    if (error) {
+      console.error('Error deleting ticket:', error);
+      throw error;
+    }
+  },
 };

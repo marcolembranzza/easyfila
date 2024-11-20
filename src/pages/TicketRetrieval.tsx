@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useToast } from "@/components/ui/use-toast";
 import { queueService } from "@/lib/supabase";
-import { Ticket, User2, Star } from "lucide-react";
+import { Ticket, User, Star } from "lucide-react";
 
 const TicketRetrieval = () => {
   const navigate = useNavigate();
@@ -45,7 +45,7 @@ const TicketRetrieval = () => {
   };
 
   return (
-    <div className="container max-w-lg mx-auto p-4">
+    <div className="container max-w-lg mx-auto p-4 animate-fade-in">
       <Card className="shadow-lg">
         <CardHeader className="text-center space-y-4">
           <div className="mx-auto p-3 bg-primary/10 rounded-full w-fit">
@@ -56,7 +56,7 @@ const TicketRetrieval = () => {
         <CardContent className="space-y-6">
           <div className="space-y-2">
             <Label htmlFor="name" className="flex items-center gap-2">
-              <User2 className="w-4 h-4" />
+              <User className="w-4 h-4" />
               Nome (opcional)
             </Label>
             <Input
