@@ -11,7 +11,7 @@ export type Database = {
     Tables: {
       queue_items: {
         Row: {
-          client_name: string
+          client_name: string | null
           created_at: string
           estimated_time: number | null
           id: string
@@ -23,7 +23,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
-          client_name: string
+          client_name?: string | null
           created_at?: string
           estimated_time?: number | null
           id?: string
@@ -35,7 +35,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
-          client_name?: string
+          client_name?: string | null
           created_at?: string
           estimated_time?: number | null
           id?: string
