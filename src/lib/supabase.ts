@@ -6,7 +6,7 @@ export const queueService = {
     const { data: insertedData, error } = await supabase
       .from('queue_items')
       .insert([{ 
-        client_name: clientName.trim() || null, 
+        client_name: clientName ? clientName.trim() : null, 
         phone_number: phoneNumber || null, 
         status: 'waiting' as QueueStatus,
         priority: priority 

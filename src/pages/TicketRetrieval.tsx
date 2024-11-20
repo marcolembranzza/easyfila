@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -19,9 +19,8 @@ const TicketRetrieval = () => {
   const handleGetTicket = async () => {
     try {
       setIsLoading(true);
-      const trimmedName = name.trim();
       const ticket = await queueService.createTicket(
-        trimmedName === "" ? null : trimmedName,
+        name,
         "",
         priority === "priority"
       );
