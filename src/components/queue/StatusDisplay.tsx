@@ -21,7 +21,7 @@ export const StatusDisplay = ({ currentTicket, isVibrating }: StatusDisplayProps
     if (currentTicket.status === 'inProgress') return "text-red-500";
     if (currentTicket.status === 'waiting') {
       const queuePosition = currentTicket.number;
-      if (queuePosition === 1) {
+      if (queuePosition === 1 || queuePosition === 2) {
         return isVibrating ? "text-orange-500" : "text-yellow-500";
       }
     }
