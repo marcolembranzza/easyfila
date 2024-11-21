@@ -7,6 +7,21 @@ import { StatusDisplay } from "@/components/queue/StatusDisplay";
 import { QueuePosition } from "@/components/queue/QueuePosition";
 import { supabase } from "@/integrations/supabase/client";
 
+// Utility functions for vibration handling
+const handleIntenseVibration = () => {
+  if ('vibrate' in navigator) {
+    // More intense vibration pattern: 400ms on, 100ms off, 400ms on, 100ms off, 400ms on
+    navigator.vibrate([400, 100, 400, 100, 400]);
+  }
+};
+
+const handleRegularVibration = () => {
+  if ('vibrate' in navigator) {
+    // Regular vibration pattern: 200ms on, 100ms off, 200ms on
+    navigator.vibrate([200, 100, 200]);
+  }
+};
+
 const ClientNotification = () => {
   const { ticketId } = useParams();
   const { toast } = useToast();
@@ -25,15 +40,16 @@ const ClientNotification = () => {
           clearInterval(vibrationIntervalRef.current);
         }
 
-        const vibrationPattern = [200, 100, 200];
-        navigator.vibrate(vibrationPattern);
+        // Use intense vibration for position 1, regular for position 2
+        const vibrationFunction = position === 1 ? handleIntenseVibration : handleRegularVibration;
+        vibrationFunction();
 
         let attempt = 0;
         const maxAttempts = 2;
 
         vibrationIntervalRef.current = setInterval(() => {
           if (attempt < maxAttempts && isActive) {
-            navigator.vibrate(vibrationPattern);
+            vibrationFunction();
             attempt++;
           } else {
             if (vibrationIntervalRef.current) {
