@@ -15,7 +15,7 @@ export const QueuePosition = ({ queuePosition, isVibrating }: QueuePositionProps
           Sua posição na fila: {queuePosition}
         </p>
       )}
-      {isVibrating && queuePosition <= 2 && (
+      {isVibrating && queuePosition === 2 && (
         <p className="text-lg font-semibold text-primary animate-pulse text-center mt-2">
           Prepare-se! Sua vez está chegando!
         </p>
