@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useParams } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
 import { queueService } from "@/lib/supabase";
@@ -14,6 +14,7 @@ const ClientNotification = () => {
   const [isVibrating, setIsVibrating] = useState(false);
   const [currentTicket, setCurrentTicket] = useState<QueueItem | null>(null);
   const [isActive, setIsActive] = useState(true);
+  const wakeLockRef = useRef<WakeLockSentinel | null>(null);
 
   const handleVibration = (position: number) => {
     try {
@@ -53,6 +54,27 @@ const ClientNotification = () => {
     }
   };
 
+  const acquireWakeLock = async () => {
+    if ('wakeLock' in navigator) {
+      try {
+        wakeLockRef.current = await navigator.wakeLock.request('screen');
+      } catch (err) {
+        console.error('Wake Lock error:', err);
+      }
+    }
+  };
+
+  const releaseWakeLock = async () => {
+    if (wakeLockRef.current) {
+      try {
+        await wakeLockRef.current.release();
+        wakeLockRef.current = null;
+      } catch (err) {
+        console.error('Wake Lock release error:', err);
+      }
+    }
+  };
+
   const fetchQueuePosition = async () => {
     if (!isActive) return;
 
@@ -89,16 +111,11 @@ const ClientNotification = () => {
         handleVibration(0);
         
         // Keep screen active during service
-        if ('wakeLock' in navigator) {
-          try {
-            await navigator.wakeLock.request('screen');
-          } catch (err) {
-            console.error('Wake Lock error:', err);
-          }
-        }
+        await acquireWakeLock();
       } else if (myTicket.status === 'completed' || myTicket.status === 'cancelled') {
         setQueuePosition(null);
         setIsVibrating(false);
+        await releaseWakeLock();
       }
     } catch (error) {
       console.error('Error fetching queue position:', error);
@@ -135,11 +152,7 @@ const ClientNotification = () => {
     return () => {
       setIsActive(false);
       channel.unsubscribe();
-      
-      // Release wake lock if active
-      if ('wakeLock' in navigator) {
-        navigator.wakeLock.release().catch(console.error);
-      }
+      releaseWakeLock();
     };
   }, [ticketId]);
 
