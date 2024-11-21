@@ -15,39 +15,41 @@ const ClientNotification = () => {
   const [currentTicket, setCurrentTicket] = useState<QueueItem | null>(null);
   const [isActive, setIsActive] = useState(true);
   const wakeLockRef = useRef<WakeLockSentinel | null>(null);
+  const vibrationIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   const handleVibration = (position: number) => {
     try {
       if ((position <= 1) && 'vibrate' in navigator) {
-        // Extended vibration pattern for better Android compatibility
+        // Clear any existing vibration interval
+        if (vibrationIntervalRef.current) {
+          clearInterval(vibrationIntervalRef.current);
+        }
+
+        // Initial vibration pattern
         const vibrationPattern = [500, 200, 500, 200, 500];
-        
-        // Initial vibration
         navigator.vibrate(vibrationPattern);
-        
-        // Continuous vibration attempts for Android
-        const retryCount = 5;
+
+        // Set up continuous vibration with intervals
         let attempt = 0;
-        
-        const retryVibration = setInterval(() => {
-          if (attempt < retryCount && isActive) {
+        const maxAttempts = 3;
+
+        vibrationIntervalRef.current = setInterval(() => {
+          if (attempt < maxAttempts && isActive) {
             navigator.vibrate(vibrationPattern);
             attempt++;
           } else {
-            clearInterval(retryVibration);
+            if (vibrationIntervalRef.current) {
+              clearInterval(vibrationIntervalRef.current);
+              vibrationIntervalRef.current = null;
+            }
           }
-        }, 2000);
+        }, 3000); // Increased interval to 3 seconds
 
         // Show toast notification
         toast({
           title: "Atenção!",
           description: position === 0 ? "É sua vez!" : "Sua vez está chegando!",
         });
-
-        // Cleanup interval on component unmount
-        return () => {
-          clearInterval(retryVibration);
-        };
       }
     } catch (error) {
       console.error('Vibration error:', error);
@@ -57,7 +59,11 @@ const ClientNotification = () => {
   const acquireWakeLock = async () => {
     if ('wakeLock' in navigator) {
       try {
+        // Release any existing wake lock first
+        await releaseWakeLock();
+        // Request new wake lock
         wakeLockRef.current = await navigator.wakeLock.request('screen');
+        console.log('Wake Lock acquired');
       } catch (err) {
         console.error('Wake Lock error:', err);
       }
@@ -69,6 +75,7 @@ const ClientNotification = () => {
       try {
         await wakeLockRef.current.release();
         wakeLockRef.current = null;
+        console.log('Wake Lock released');
       } catch (err) {
         console.error('Wake Lock release error:', err);
       }
@@ -76,7 +83,7 @@ const ClientNotification = () => {
   };
 
   const fetchQueuePosition = async () => {
-    if (!isActive) return;
+    if (!isActive || !ticketId) return;
 
     try {
       const items = await queueService.getQueueItems();
@@ -103,16 +110,15 @@ const ClientNotification = () => {
         if (position <= 2) {
           setIsVibrating(true);
           handleVibration(position);
+        } else {
+          setIsVibrating(false);
         }
       } else if (myTicket.status === 'inProgress') {
-        // Force visibility during service
         setQueuePosition(0);
         setIsVibrating(true);
         handleVibration(0);
-        
-        // Keep screen active during service
         await acquireWakeLock();
-      } else if (myTicket.status === 'completed' || myTicket.status === 'cancelled') {
+      } else {
         setQueuePosition(null);
         setIsVibrating(false);
         await releaseWakeLock();
@@ -148,9 +154,12 @@ const ClientNotification = () => {
       )
       .subscribe();
 
-    // Cleanup on component unmount
+    // Cleanup function
     return () => {
       setIsActive(false);
+      if (vibrationIntervalRef.current) {
+        clearInterval(vibrationIntervalRef.current);
+      }
       channel.unsubscribe();
       releaseWakeLock();
     };
