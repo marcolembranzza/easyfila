@@ -13,32 +13,40 @@ const ClientNotification = () => {
   const [queuePosition, setQueuePosition] = useState<number | null>(null);
   const [isVibrating, setIsVibrating] = useState(false);
   const [currentTicket, setCurrentTicket] = useState<QueueItem | null>(null);
+  const [isActive, setIsActive] = useState(true);
 
   const handleVibration = (position: number) => {
     try {
       if ((position <= 1) && 'vibrate' in navigator) {
-        // Longer vibration pattern for better Android compatibility
-        const vibrationPattern = [300, 150, 300, 150, 300];
+        // Extended vibration pattern for better Android compatibility
+        const vibrationPattern = [500, 200, 500, 200, 500];
+        
+        // Initial vibration
         navigator.vibrate(vibrationPattern);
         
-        // Multiple vibration attempts for Android
-        const retryCount = 3;
+        // Continuous vibration attempts for Android
+        const retryCount = 5;
         let attempt = 0;
         
         const retryVibration = setInterval(() => {
-          if (attempt < retryCount) {
+          if (attempt < retryCount && isActive) {
             navigator.vibrate(vibrationPattern);
             attempt++;
           } else {
             clearInterval(retryVibration);
           }
-        }, 1000);
+        }, 2000);
 
-        // Show appropriate toast message
+        // Show toast notification
         toast({
           title: "Atenção!",
           description: position === 0 ? "É sua vez!" : "Sua vez está chegando!",
         });
+
+        // Cleanup interval on component unmount
+        return () => {
+          clearInterval(retryVibration);
+        };
       }
     } catch (error) {
       console.error('Vibration error:', error);
@@ -46,6 +54,8 @@ const ClientNotification = () => {
   };
 
   const fetchQueuePosition = async () => {
+    if (!isActive) return;
+
     try {
       const items = await queueService.getQueueItems();
       const waitingItems = items.filter(item => item.status === 'waiting');
@@ -60,7 +70,7 @@ const ClientNotification = () => {
         return;
       }
 
-      // Always update the current ticket state
+      // Update current ticket state
       setCurrentTicket(myTicket);
       
       // Handle different ticket statuses
@@ -73,10 +83,19 @@ const ClientNotification = () => {
           handleVibration(position);
         }
       } else if (myTicket.status === 'inProgress') {
-        // Ensure visibility during service
+        // Force visibility during service
         setQueuePosition(0);
         setIsVibrating(true);
         handleVibration(0);
+        
+        // Keep screen active during service
+        if ('wakeLock' in navigator) {
+          try {
+            await navigator.wakeLock.request('screen');
+          } catch (err) {
+            console.error('Wake Lock error:', err);
+          }
+        }
       } else if (myTicket.status === 'completed' || myTicket.status === 'cancelled') {
         setQueuePosition(null);
         setIsVibrating(false);
@@ -92,6 +111,7 @@ const ClientNotification = () => {
   };
 
   useEffect(() => {
+    setIsActive(true);
     fetchQueuePosition();
     
     const channel = supabase
@@ -104,14 +124,22 @@ const ClientNotification = () => {
           table: 'queue_items'
         },
         async () => {
-          await fetchQueuePosition();
+          if (isActive) {
+            await fetchQueuePosition();
+          }
         }
       )
       .subscribe();
 
-    // Cleanup subscription and intervals on component unmount
+    // Cleanup on component unmount
     return () => {
+      setIsActive(false);
       channel.unsubscribe();
+      
+      // Release wake lock if active
+      if ('wakeLock' in navigator) {
+        navigator.wakeLock.release().catch(console.error);
+      }
     };
   }, [ticketId]);
 
