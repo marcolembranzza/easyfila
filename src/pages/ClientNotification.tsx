@@ -16,22 +16,20 @@ const ClientNotification = () => {
   const [isActive, setIsActive] = useState(true);
   const wakeLockRef = useRef<WakeLockSentinel | null>(null);
   const vibrationIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const keepScreenOnInterval = useRef<NodeJS.Timeout | null>(null);
 
   const handleVibration = (position: number) => {
     try {
       if ((position <= 1) && 'vibrate' in navigator) {
-        // Clear any existing vibration interval
         if (vibrationIntervalRef.current) {
           clearInterval(vibrationIntervalRef.current);
         }
 
-        // Initial vibration pattern
-        const vibrationPattern = [500, 200, 500, 200, 500];
+        const vibrationPattern = [200, 100, 200];
         navigator.vibrate(vibrationPattern);
 
-        // Set up continuous vibration with intervals
         let attempt = 0;
-        const maxAttempts = 3;
+        const maxAttempts = 2;
 
         vibrationIntervalRef.current = setInterval(() => {
           if (attempt < maxAttempts && isActive) {
@@ -43,9 +41,8 @@ const ClientNotification = () => {
               vibrationIntervalRef.current = null;
             }
           }
-        }, 3000); // Increased interval to 3 seconds
+        }, 5000);
 
-        // Show toast notification
         toast({
           title: "Atenção!",
           description: position === 0 ? "É sua vez!" : "Sua vez está chegando!",
@@ -56,29 +53,60 @@ const ClientNotification = () => {
     }
   };
 
+  const startKeepScreenOn = () => {
+    if (keepScreenOnInterval.current) {
+      clearInterval(keepScreenOnInterval.current);
+    }
+
+    // Tenta manter a tela ligada através de interações periódicas
+    keepScreenOnInterval.current = setInterval(() => {
+      if (document.hidden) {
+        window.focus();
+      }
+      // Força uma pequena atualização do DOM
+      const tempElement = document.createElement('div');
+      document.body.appendChild(tempElement);
+      document.body.removeChild(tempElement);
+    }, 15000);
+  };
+
+  const stopKeepScreenOn = () => {
+    if (keepScreenOnInterval.current) {
+      clearInterval(keepScreenOnInterval.current);
+      keepScreenOnInterval.current = null;
+    }
+  };
+
   const acquireWakeLock = async () => {
     if ('wakeLock' in navigator) {
       try {
-        // Release any existing wake lock first
         await releaseWakeLock();
-        // Request new wake lock
         wakeLockRef.current = await navigator.wakeLock.request('screen');
         console.log('Wake Lock acquired');
+        
+        // Inicia o mecanismo de fallback
+        startKeepScreenOn();
       } catch (err) {
         console.error('Wake Lock error:', err);
+        // Se falhar o Wake Lock, usa apenas o fallback
+        startKeepScreenOn();
       }
+    } else {
+      // Se Wake Lock não estiver disponível, usa o fallback
+      startKeepScreenOn();
     }
   };
 
   const releaseWakeLock = async () => {
-    if (wakeLockRef.current) {
-      try {
+    try {
+      if (wakeLockRef.current) {
         await wakeLockRef.current.release();
         wakeLockRef.current = null;
         console.log('Wake Lock released');
-      } catch (err) {
-        console.error('Wake Lock release error:', err);
       }
+      stopKeepScreenOn();
+    } catch (err) {
+      console.error('Wake Lock release error:', err);
     }
   };
 
@@ -99,10 +127,8 @@ const ClientNotification = () => {
         return;
       }
 
-      // Update current ticket state
       setCurrentTicket(myTicket);
       
-      // Handle different ticket statuses
       if (myTicket.status === 'waiting') {
         const position = waitingItems.findIndex(item => item.id === ticketId) + 1;
         setQueuePosition(position);
@@ -160,10 +186,28 @@ const ClientNotification = () => {
       if (vibrationIntervalRef.current) {
         clearInterval(vibrationIntervalRef.current);
       }
+      if (keepScreenOnInterval.current) {
+        clearInterval(keepScreenOnInterval.current);
+      }
       channel.unsubscribe();
       releaseWakeLock();
     };
   }, [ticketId]);
+
+  // Adiciona um listener para o evento visibilitychange
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (!document.hidden && currentTicket?.status === 'inProgress') {
+        acquireWakeLock();
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [currentTicket?.status]);
 
   return (
     <div className="container mx-auto p-4 max-w-md">
